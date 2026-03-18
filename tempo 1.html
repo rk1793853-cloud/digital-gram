@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>टेम्पो कंट्रोल - जालेऊ</title>
+<style>
+    :root { --tempo-bg: #f2994a; --tempo-dark: #d35400; --bg: #fdf2e9; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; -webkit-tap-highlight-color: transparent; }
+    body { background-color: var(--bg); display: flex; justify-content: center; min-height: 100vh; }
+    
+    .app-container { width: 100%; max-width: 400px; min-height: 100vh; background: white; box-shadow: 0 0 20px rgba(0,0,0,0.1); position: relative; }
+    .page { display: none; animation: fadeIn 0.3s ease; padding: 20px; padding-bottom: 50px; }
+    .active-page { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    .header { background: linear-gradient(135deg, var(--tempo-bg), var(--tempo-dark)); padding: 40px 20px 30px; text-align: center; color: white; border-bottom-left-radius: 25px; border-bottom-right-radius: 25px; box-shadow: 0 4px 15px rgba(211, 84, 0, 0.2); margin-bottom: 20px; position: relative;}
+    .logout-btn { position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.2); border: 1px solid white; color: white; padding: 5px 10px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; }
+    
+    .notice-box { background: #fff3cd; border: 1px solid #ffeeba; color: #856404; padding: 15px; border-radius: 12px; font-size: 13px; line-height: 1.5; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+    
+    .input-group { margin-bottom: 15px; }
+    .input-group label { display: block; font-size: 13px; font-weight: bold; margin-bottom: 6px; color: #444; }
+    .input-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; outline: none; background: #fafafa; font-size: 14px; }
+    .input-group input:focus { border-color: var(--tempo-bg); }
+    
+    .round-box { background: #f8f9fa; border: 1px solid #e9ecef; padding: 15px; border-radius: 12px; margin-bottom: 15px; }
+    .round-title { font-size: 14px; font-weight: bold; color: var(--tempo-dark); margin-bottom: 10px; border-bottom: 1px solid #ddd; padding-bottom: 5px; }
+    .time-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+    .main-btn { width: 100%; padding: 15px; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; color: white; background: var(--tempo-bg); box-shadow: 0 4px 10px rgba(211, 84, 0, 0.3); transition: 0.2s; margin-top: 10px; }
+    .main-btn:active { transform: scale(0.95); }
+
+    .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #dc3545; transition: .4s; border-radius: 34px; }
+    .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+    input:checked + .slider { background-color: #28a745; }
+    input:checked + .slider:before { transform: translateX(24px); }
+
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.7); z-index: 9999; display: none; align-items: center; justify-content: center; }
+    .modal-box { background: white; width: 85%; max-width: 300px; border-radius: 15px; padding: 20px; text-align: center; }
+    .modal-btn { padding: 10px 20px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; background: var(--tempo-bg); color: white; margin-top: 15px; width: 100%; }
+</style>
+</head>
+<body>
+
+<div class="app-container">
+
+    <div id="page-login" class="page active-page" style="padding:0;">
+        <div class="header" style="padding-top: 60px; padding-bottom: 50px;">
+            <div style="font-size: 50px; margin-bottom: 10px;">🛺</div>
+            <h2>टेम्पो स्मार्ट कंट्रोल</h2>
+            <p style="font-size: 12px; margin-top: 5px;">केवल जालेऊ टेम्पो चालकों के लिए</p>
+        </div>
+        <div style="padding: 20px;">
+            <div class="input-group">
+                <label>पंजीकृत मोबाइल नंबर</label>
+                <input type="tel" id="log-mob" placeholder="10 अंकों का नंबर">
+            </div>
+            <div class="input-group">
+                <label>पासवर्ड</label>
+                <input type="password" id="log-pass" placeholder="पासवर्ड लिखें">
+            </div>
+            <button class="main-btn" onclick="loginTempo()">लॉगिन करें ❯</button>
+        </div>
+    </div>
+
+    <div id="page-dashboard" class="page" style="padding:0;">
+        <div class="header">
+            <button class="logout-btn" onclick="logout()">लॉगआउट</button>
+            <h3 id="driver-name">लोड हो रहा है...</h3>
+            <p style="font-size: 13px; opacity: 0.9;">लाइव कंट्रोल पैनल</p>
+        </div>
+        
+        <div style="padding: 0 20px 20px;">
+            <div class="notice-box">
+                <b>📢 निर्देश:</b><br>
+                1. जब गाड़ी चले, तभी लाइव लोकेशन चालू करें।<br>
+                2. लोकेशन चालू करने के बाद आप ऐप बंद कर सकते हैं।<br>
+                3. दिन के जितने फेरे (Round) हों, उनका समय नीचे सेट करें।
+            </div>
+
+            <div style="background:#fff; border:1px solid #ddd; padding:15px; border-radius:12px; margin-bottom:15px; box-shadow:0 2px 8px rgba(0,0,0,0.05);">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #eee; padding-bottom:10px;">
+                    <div><b style="color:#333;">आज गाड़ी चालू है?</b></div>
+                    <label class="switch"><input type="checkbox" id="statusToggle" onchange="updateLiveStatus()"><span class="slider"></span></label>
+                </div>
+                
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <b style="color:var(--tempo-dark);">📍 लाइव लोकेशन (Background)</b>
+                        <div id="loc-status" style="font-size:11px; color:#dc3545; font-weight:bold; margin-top:3px;">लोकेशन बंद है</div>
+                    </div>
+                    <label class="switch"><input type="checkbox" id="locToggle" onchange="toggleGPS()"><span class="slider"></span></label>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>गाड़ी का नाम / नंबर</label>
+                <input type="text" id="tempo-name" placeholder="जैसे: RJ10-XXXX या गोदारा टेम्पो">
+            </div>
+
+            <h3 style="font-size:15px; color:#333; margin: 20px 0 10px;">🕒 फेरों का समय (Round Timings)</h3>
+            
+            <div class="round-box"><div class="round-title">फेरा 1 (Round 1)</div><div class="time-grid"><div><label style="font-size:11px;">जालेऊ से प्रस्थान</label><input type="time" id="r1-go"></div><div><label style="font-size:11px;">फतेहपुर से वापसी</label><input type="time" id="r1-back"></div></div></div>
+            <div class="round-box"><div class="round-title">फेरा 2 (Round 2)</div><div class="time-grid"><div><label style="font-size:11px;">जालेऊ से प्रस्थान</label><input type="time" id="r2-go"></div><div><label style="font-size:11px;">फतेहपुर से वापसी</label><input type="time" id="r2-back"></div></div></div>
+            <div class="round-box"><div class="round-title">फेरा 3 (Round 3)</div><div class="time-grid"><div><label style="font-size:11px;">जालेऊ से प्रस्थान</label><input type="time" id="r3-go"></div><div><label style="font-size:11px;">फतेहपुर से वापसी</label><input type="time" id="r3-back"></div></div></div>
+
+            <button class="main-btn" onclick="saveTempoData()">✅ सभी जानकारी सेव करें</button>
+        </div>
+    </div>
+
+    <div id="customModal" class="modal-overlay">
+        <div class="modal-box">
+            <h3 style="color:var(--tempo-dark); margin-bottom:10px;">अलर्ट</h3>
+            <p id="modal-msg" style="font-size:14px; color:#555; margin-bottom:15px;"></p>
+            <button class="modal-btn" onclick="document.getElementById('customModal').style.display='none'">ठीक है</button>
+        </div>
+    </div>
+
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+
+<script>
+    var firebaseConfig = { 
+        apiKey: "AIzaSyBwGpUB6mRG4SJCa0efoLKIwSUrHmrpQ9w", 
+        authDomain: "digital-gram-99d8c.firebaseapp.com", 
+        projectId: "digital-gram-99d8c", 
+        storageBucket: "digital-gram-99d8c.firebasestorage.app", 
+        messagingSenderId: "289275700443", 
+        appId: "1:289275700443:web:d0c5fde9ef1e546c5e58fe" 
+    };
+    firebase.initializeApp(firebaseConfig); 
+    var db = firebase.firestore();
+
+    var loggedInMobile = localStorage.getItem("tempoMobile");
+
+    function customAlert(msg) {
+        document.getElementById('modal-msg').innerText = msg;
+        document.getElementById('customModal').style.display = 'flex';
+    }
+
+    if(loggedInMobile) { loadTempoData(loggedInMobile); }
+
+    function loginTempo() {
+        var mob = document.getElementById('log-mob').value;
+        var pass = document.getElementById('log-pass').value;
+        if(!mob || !pass) return customAlert("कृपया नंबर और पासवर्ड भरें!");
+
+        db.collection("users").doc(String(mob)).get().then(function(doc) {
+            if(doc.exists && doc.data().password === pass) {
+                if(doc.data().category === 'tempo') {
+                    localStorage.setItem("tempoMobile", mob);
+                    loadTempoData(mob);
+                } else { customAlert("❌ यह ऐप केवल 'टेम्पो चालकों' के लिए है!"); }
+            } else { customAlert("❌ गलत नंबर या पासवर्ड!"); }
+        }).catch(function(e) { console.error(e); customAlert("नेटवर्क एरर!"); });
+    }
+
+    function loadTempoData(mob) {
+        document.getElementById('page-login').classList.remove('active-page');
+        document.getElementById('page-dashboard').classList.add('active-page');
+
+        db.collection("users").doc(String(mob)).get().then(function(doc) {
+            if(doc.exists) {
+                var d = doc.data();
+                document.getElementById('driver-name').innerText = "🛺 " + (d.shopName || d.name);
+                document.getElementById('tempo-name').value = d.shopName || '';
+                document.getElementById('statusToggle').checked = d.isOpen !== false;
+                
+                if(d.trips) {
+                    document.getElementById('r1-go').value = d.trips.r1Go || '';
+                    document.getElementById('r1-back').value = d.trips.r1Back || '';
+                    document.getElementById('r2-go').value = d.trips.r2Go || '';
+                    document.getElementById('r2-back').value = d.trips.r2Back || '';
+                    document.getElementById('r3-go').value = d.trips.r3Go || '';
+                    document.getElementById('r3-back').value = d.trips.r3Back || '';
+                }
+            }
+        });
+    }
+
+    function updateLiveStatus() {
+        var isOpen = document.getElementById('statusToggle').checked;
+        db.collection("users").doc(String(localStorage.getItem("tempoMobile"))).update({ isOpen: isOpen });
+    }
+
+    function saveTempoData() {
+        var tName = document.getElementById('tempo-name').value;
+        var tripsData = {
+            r1Go: document.getElementById('r1-go').value, r1Back: document.getElementById('r1-back').value,
+            r2Go: document.getElementById('r2-go').value, r2Back: document.getElementById('r2-back').value,
+            r3Go: document.getElementById('r3-go').value, r3Back: document.getElementById('r3-back').value
+        };
+
+        db.collection("users").doc(String(localStorage.getItem("tempoMobile"))).update({
+            shopName: tName, trips: tripsData
+        }).then(function() { customAlert("✅ टाइमिंग और जानकारी सेव हो गई!"); });
+    }
+
+    // --- NEW GPS LOGIC (Sends Message to Kodular CustomWebView) ---
+    function toggleGPS() {
+        var isChecked = document.getElementById('locToggle').checked;
+        var statusTxt = document.getElementById('loc-status');
+        var mob = localStorage.getItem("tempoMobile");
+
+        if(isChecked) {
+            statusTxt.innerText = "लाइव ट्रैकिंग चालू है 🟢";
+            statusTxt.style.color = "#28a745";
+            
+            // कोडलर को START का मैसेज और मोबाइल नंबर भेजना
+            if(window.CustomWebView) {
+                window.CustomWebView.postMessage("START_GPS," + mob);
+            } else {
+                alert("यह फीचर केवल ओरिजिनल ऐप के अंदर काम करेगा!");
+            }
+        } else {
+            statusTxt.innerText = "लोकेशन बंद है 🔴";
+            statusTxt.style.color = "#dc3545";
+            
+            // कोडलर को STOP का मैसेज भेजना
+            if(window.CustomWebView) {
+                window.CustomWebView.postMessage("STOP_GPS");
+            }
+        }
+    }
+
+    function logout() {
+        localStorage.removeItem("tempoMobile");
+        // अगर लॉगआउट किया, तो भी लोकेशन बंद हो जाए
+        if(window.CustomWebView) { window.CustomWebView.postMessage("STOP_GPS"); }
+        document.getElementById('page-dashboard').classList.remove('active-page');
+        document.getElementById('page-login').classList.add('active-page');
+    }
+</script>
+</body>
+</html>
