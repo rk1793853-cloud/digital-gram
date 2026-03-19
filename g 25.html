@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+       <!DOCTYPE html>
 <html lang="hi">
 <head>
 <meta charset="UTF-8">
@@ -102,7 +102,6 @@
     #status-leave:checked + .status-label { background-color: #f8d7da; border-color: #dc3545; color: #721c24; box-shadow: 0px 4px 10px rgba(220, 53, 69, 0.3); }
     .trip-row { background: #f4f7fb; border: 1px solid #cddcf6; padding: 15px; border-radius: 10px; margin-bottom: 15px; position: relative; }
     
-    /* 🛠️ FIXED: Save & Add Trip Buttons Styling */
     .add-trip-btn { width: 100%; padding: 14px; background: linear-gradient(to right, #f7971e, #ffd200); color: #fff; border: none; border-radius: 50px; font-size: 16px; font-weight: bold; cursor: pointer; margin-bottom: 15px; box-shadow: 0px 4px 10px rgba(247, 151, 30, 0.3); }
     .save-btn { width: 100%; padding: 15px; background: linear-gradient(to right, #11998e, #38ef7d); color: white; border: none; border-radius: 50px; font-size: 18px; font-weight: bold; cursor: pointer; box-shadow: 0px 5px 15px rgba(17, 153, 142, 0.4); text-transform: uppercase; letter-spacing: 1px; margin-top: 10px; }
     .save-btn:active { transform: scale(0.98); }
@@ -110,17 +109,6 @@
 </head>
 <body>
 <div class="app-container">
-    <div id="custom-loc-modal" class="modal-overlay">
-        <div class="modal-box">
-            <h3 style="color:#f2994a;">📍 लोकेशन की अनुमति</h3>
-            <p>टेम्पो की लाइव लोकेशन गाँव वालों को दिखाने के लिए, कृपया अगली स्क्रीन पर <b>'Allow' (अनुमति दें)</b> पर क्लिक करें。</p>
-            <div class="modal-btns">
-                <button class="modal-btn cancel-btn" onclick="cancelLocation()">रद्द करें</button>
-                <button class="modal-btn ok-btn" style="background:#f2994a;" onclick="requestNativeLocation()">ठीक है</button>
-            </div>
-        </div>
-    </div>
-    
     <div id="customModal" class="modal-overlay">
         <div class="modal-box">
             <h3 id="modal-title" style="color:var(--primary);">डिजिटल ग्राम जालेऊ</h3>
@@ -131,6 +119,7 @@
             </div>
         </div>
     </div>
+
     <div id="screen-maintenance" class="full-screen-overlay">
         <span style="font-size:60px; margin-bottom:20px;">🛠️</span>
         <h1>ऐप मेंटेनेंस में है</h1>
@@ -412,7 +401,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
 <script>
-    // --- FIREBASE CONFIGURATION ---
+    // --- FIREBASE CONFIGURATION (Realtime DB Added) ---
     var firebaseConfig = { 
         apiKey: "AIzaSyBwGpUB6mRG4SJCa0efoLKIwSUrHmrpQ9w", 
         authDomain: "digital-gram-99d8c.firebaseapp.com", 
@@ -420,13 +409,13 @@
         storageBucket: "digital-gram-99d8c.firebasestorage.app", 
         messagingSenderId: "289275700443", 
         appId: "1:289275700443:web:d0c5fde9ef1e546c5e58fe",
-        databaseURL: "https://digital-gram-99d8c-default-rtdb.firebaseio.com/" // 📍 NEW: Realtime Database URL
+        databaseURL: "https://digital-gram-99d8c-default-rtdb.firebaseio.com/" // 📍 Realtime Database
     };
     
     // Initialize Firebase
     firebase.initializeApp(firebaseConfig); 
     var db = firebase.firestore();
-    var rtdb = firebase.database(); // 📍 NEW: Realtime Database को चालू कर दिया
+    var rtdb = firebase.database(); // 📍 Realtime DB चालू
 
     // --- GLOBAL VARIABLES ---
     var currentPage = 'page-login'; 
@@ -435,11 +424,10 @@
     var userCat = ''; 
     var globalUserName = ''; 
     var isUserVerified = false; 
-    var gpsIntervalId = null; 
     var currentShopServices = []; 
     var globalListCache = []; 
     var visibleListCount = 5;
-    var tripCount = 0; // 🛺 टेम्पो के डब्बों के लिए
+    var tripCount = 0; // 🛺 टेम्पो डब्बों के लिए
 
     // Tempo Stops Coordinates
     var tempoStops = [ 
@@ -475,26 +463,6 @@
             if(onConfirm) onConfirm(); 
         }; 
         document.getElementById('customModal').style.display = 'flex'; 
-    }
-
-    // --- CUSTOM LOCATION MODAL LOGIC ---
-    function triggerLocationModal() {
-        var isChecked = document.getElementById('liveLocToggle').checked;
-        if(isChecked) {
-            document.getElementById('custom-loc-modal').style.display = 'flex';
-        } else {
-            toggleLiveLocation(false);
-        }
-    }
-
-    function cancelLocation() {
-        document.getElementById('custom-loc-modal').style.display = 'none';
-        document.getElementById('liveLocToggle').checked = false;
-    }
-
-    function requestNativeLocation() {
-        document.getElementById('custom-loc-modal').style.display = 'none';
-        toggleLiveLocation(true); 
     }
 
     // --- STRICT REGEX VALIDATIONS ---
@@ -543,7 +511,6 @@
     function logout() { 
         customConfirm("क्या आप लॉगआउट करना चाहते हैं?", function() { 
             localStorage.removeItem("userMobile"); 
-            if(gpsIntervalId) clearInterval(gpsIntervalId); 
             goToPage('page-login'); 
         }); 
     }
@@ -565,97 +532,6 @@
         } 
     }
 
-    // --- APP LOAD LOGIC ---
-    async function checkGlobalSettings() {
-        try {
-            var configSnap = await db.collection("settings").doc("app_config").get();
-            if(configSnap.exists) {
-                var conf = configSnap.data();
-                if(conf.forceUpdate) { 
-                    document.getElementById('screen-force-update').style.display = 'flex'; 
-                    if(conf.updateLink) {
-                        document.getElementById('btn-download-update').onclick = function() { 
-                            window.open(conf.updateLink, '_blank'); 
-                        };
-                        document.getElementById('update-qr-img').src = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=" + encodeURIComponent(conf.updateLink);
-                        document.getElementById('qr-code-box').style.display = 'block';
-                    }
-                    return false; 
-                }
-                if(conf.maintenance) { 
-                    document.getElementById('screen-maintenance').style.display = 'flex'; 
-                    return false; 
-                }
-            }
-            var alertSnap = await db.collection("settings").doc("global_alert").get();
-            if(alertSnap.exists) {
-                var data = alertSnap.data(); 
-                var lastAlert = localStorage.getItem("lastAlertTime");
-                if(data.timestamp && (!lastAlert || lastAlert != data.timestamp.toMillis())) { 
-                    customAlert("🚨 आवश्यक सूचना:\n\n" + data.message); 
-                    localStorage.setItem("lastAlertTime", data.timestamp.toMillis()); 
-                }
-            }
-            return true;
-        } catch(e) { 
-            console.error(e); 
-            return true; 
-        }
-    }
-
-    var loggedInMobile = localStorage.getItem("userMobile"); 
-    
-    if (loggedInMobile) { 
-        fetchAndRouteUser(loggedInMobile); 
-    } else { 
-        goToPage('page-login'); 
-        checkGlobalSettings(); 
-    }
-
-    async function fetchAndRouteUser(mob) {
-        try {
-            var isAppLive = await checkGlobalSettings(); 
-            if(!isAppLive) return; 
-            
-            var docSnap = await db.collection("users").doc(String(mob)).get();
-            if (docSnap.exists) {
-                var data = docSnap.data(); 
-                if (data.banUntil && (data.banUntil === 'perm' || data.banUntil > new Date().getTime())) {
-                    customAlert("🚫 आपका अकाउंट बैन है।"); 
-                    localStorage.removeItem("userMobile"); 
-                    goToPage('page-login'); 
-                    return;
-                }
-                userCat = data.category || 'gramwasi'; 
-                globalUserName = data.name; 
-                isUserVerified = data.isVerified || false;
-                
-                var tickHtml = isUserVerified ? '<span class="blue-tick">✅</span>' : '';
-                document.getElementById('user-name-display').innerHTML = "स्वागत है, " + data.name + tickHtml;
-                
-                document.getElementById('admin-icon-tempo').style.display = 'none'; 
-                document.getElementById('admin-icon-shop').style.display = 'none'; 
-                document.getElementById('admin-icon-sarpanch').style.display = 'none';
-
-                if(userCat === 'tempo') {
-                    document.getElementById('admin-icon-tempo').style.display = 'flex'; 
-                } else if(userCat === 'shop' || userCat === 'emitra' || userCat === 'other') {
-                    document.getElementById('admin-icon-shop').style.display = 'flex'; 
-                } else if(userCat === 'sarpanch' || userCat === 'panch') {
-                    document.getElementById('admin-icon-sarpanch').style.display = 'flex';
-                }
-                
-                goToPage('page-home'); 
-            } else { 
-                localStorage.removeItem("userMobile"); 
-                goToPage('page-login'); 
-            }
-        } catch (e) { 
-            console.error(e); 
-            customAlert("नेटवर्क समस्या।"); 
-        }
-    }
-
     function submitLogin() { 
         var mob = document.getElementById('log-mob').value; 
         var pass = document.getElementById('log-pass').value; 
@@ -674,7 +550,7 @@
         }).catch(function(e) { console.error(e); });
     }
 
-    // 👑 FIXED: Sarpanch Registration Security Check
+    // 👑 FIXED: 1 Sarpanch Account Security Check
     function submitRegister() { 
         var name = document.getElementById('reg-name').value; 
         var mob = document.getElementById('reg-mob').value; 
@@ -682,37 +558,25 @@
         var pass = document.getElementById('reg-pass').value; 
         var cat = document.getElementById('reg-cat').value; 
         
-        if(!name || !mob || !dob || !pass) {
-            return customAlert("⚠️ सभी जानकारी भरना आवश्यक है!"); 
-        }
-        if(!isValidMobile(mob)) {
-            return customAlert("❌ कृपया सही 10 अंकों का मोबाइल नंबर डालें (1234567890 या 1111111111 जैसे नंबर नहीं)।");
-        }
-        if(!isValidPassword(pass)) {
-            return customAlert("❌ कमज़ोर पासवर्ड! पासवर्ड का पहला अक्षर बड़ा होना चाहिए, एक नंबर (1-9) और एक चिन्ह (@, #, $) होना चाहिए। कम से कम 6 अक्षर लंबा हो।");
-        }
+        if(!name || !mob || !dob || !pass) { return customAlert("⚠️ सभी जानकारी भरना आवश्यक है!"); }
+        if(!isValidMobile(mob)) { return customAlert("❌ कृपया सही 10 अंकों का मोबाइल नंबर डालें।"); }
+        if(!isValidPassword(pass)) { return customAlert("❌ कमज़ोर पासवर्ड! पहला अक्षर बड़ा, एक नंबर और एक चिन्ह (@, #) होना चाहिए।"); }
 
         var extra = { name: name, dob: dob, category: cat, isVerified: false }; 
-        if(cat === 'gramwasi') {
-            extra.ward = document.getElementById('reg-ward').value; 
-        } else if(cat !== 'sarpanch' && cat !== 'panch') { 
+        if(cat === 'gramwasi') { extra.ward = document.getElementById('reg-ward').value; } 
+        else if(cat !== 'sarpanch' && cat !== 'panch') { 
             extra.shopName = document.getElementById('reg-shopname').value; 
             extra.isOpen = true; 
-            if(cat === 'other') {
-                extra.customCategory = document.getElementById('reg-other-cat').value; 
-            }
+            if(cat === 'other') { extra.customCategory = document.getElementById('reg-other-cat').value; }
         } 
         
         var userRef = db.collection("users").doc(String(mob)); 
-
+        
         var finalizeRegistration = function() {
             userRef.get().then(function(docSnap) {
-                if(docSnap.exists) {
-                    return customAlert("⚠️ इस नंबर पर खाता पहले से है!"); 
-                }
+                if(docSnap.exists) { return customAlert("⚠️ इस नंबर पर खाता पहले से है!"); }
                 userRef.set(Object.assign({ mobile: mob, password: pass }, extra)).then(function() {
-                    customAlert("✅ खाता बन गया! अब आप लॉगिन करें।"); 
-                    goToPage('page-login'); 
+                    customAlert("✅ खाता बन गया! अब आप लॉगिन करें।"); goToPage('page-login'); 
                 });
             }).catch(function(e) { console.error(e); });
         };
@@ -722,9 +586,7 @@
             db.collection("users").where("category", "==", "sarpanch").get().then(function(snap) {
                 if (!snap.empty) {
                     return customAlert("❌ गाँव में पहले से ही एक सरपंच का खाता मौजूद है! आप दूसरा सरपंच खाता नहीं बना सकते।");
-                } else {
-                    finalizeRegistration();
-                }
+                } else { finalizeRegistration(); }
             }).catch(function(e) { console.error(e); });
         } else {
             finalizeRegistration();
@@ -733,138 +595,111 @@
 
     var verifiedMobile = ""; 
     function verifyUserForPassword() { 
-        var mob = document.getElementById('forgot-mob').value; 
-        var name = document.getElementById('forgot-name').value; 
-        var dob = document.getElementById('forgot-dob').value; 
-        
-        if(!mob || !name || !dob) {
-            return customAlert("⚠️ कृपया सभी जानकारी भरें!"); 
-        }
+        var mob = document.getElementById('forgot-mob').value; var name = document.getElementById('forgot-name').value; var dob = document.getElementById('forgot-dob').value; 
+        if(!mob || !name || !dob) { return customAlert("⚠️ कृपया सभी जानकारी भरें!"); }
         
         db.collection("users").doc(String(mob)).get().then(function(docSnap) {
             if (docSnap.exists && docSnap.data().name === name && docSnap.data().dob === dob) { 
-                verifiedMobile = mob; 
-                document.getElementById('forgot-step-1').style.display = 'none'; 
-                document.getElementById('forgot-step-2').style.display = 'block'; 
-            } else { 
-                customAlert("❌ जानकारी मैच नहीं हुई!"); 
-            } 
+                verifiedMobile = mob; document.getElementById('forgot-step-1').style.display = 'none'; document.getElementById('forgot-step-2').style.display = 'block'; 
+            } else { customAlert("❌ जानकारी मैच नहीं हुई!"); } 
         }).catch(function(e) { console.error(e); });
     }
 
     function resetUserPassword() { 
         var newPass = document.getElementById('forgot-new-pass').value; 
-        if(!isValidPassword(newPass)) {
-            return customAlert("❌ कमज़ोर पासवर्ड! पहला अक्षर बड़ा, एक नंबर और एक विशेष चिन्ह (@,#) ज़रूर लगाएं।");
-        }
-        
+        if(!isValidPassword(newPass)) { return customAlert("❌ कमज़ोर पासवर्ड! पहला अक्षर बड़ा, एक नंबर और एक विशेष चिन्ह (@,#) ज़रूर लगाएं।"); }
         db.collection("users").doc(String(verifiedMobile)).update({ password: newPass }).then(function() {
-            customAlert("✅ पासवर्ड सफलतापूर्वक बदल दिया गया है!"); 
-            goToPage('page-login'); 
+            customAlert("✅ पासवर्ड सफलतापूर्वक बदल दिया गया है!"); goToPage('page-login'); 
         }).catch(function(e) { console.error(e); });
     }
-
-    function refreshApp() { 
-        customAlert("🔄 डेटा रिफ्रेश हो रहा है..."); 
-        fetchAndRouteUser(localStorage.getItem("userMobile")); 
+    // --- APP LOAD LOGIC ---
+    async function checkGlobalSettings() {
+        try {
+            var configSnap = await db.collection("settings").doc("app_config").get();
+            if(configSnap.exists) {
+                var conf = configSnap.data();
+                if(conf.forceUpdate) { 
+                    document.getElementById('screen-force-update').style.display = 'flex'; 
+                    if(conf.updateLink) {
+                        document.getElementById('btn-download-update').onclick = function() { window.open(conf.updateLink, '_blank'); };
+                        document.getElementById('update-qr-img').src = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=" + encodeURIComponent(conf.updateLink);
+                        document.getElementById('qr-code-box').style.display = 'block';
+                    }
+                    return false; 
+                }
+                if(conf.maintenance) { document.getElementById('screen-maintenance').style.display = 'flex'; return false; }
+            }
+            var alertSnap = await db.collection("settings").doc("global_alert").get();
+            if(alertSnap.exists) {
+                var data = alertSnap.data(); var lastAlert = localStorage.getItem("lastAlertTime");
+                if(data.timestamp && (!lastAlert || lastAlert != data.timestamp.toMillis())) { 
+                    customAlert("🚨 आवश्यक सूचना:\n\n" + data.message); localStorage.setItem("lastAlertTime", data.timestamp.toMillis()); 
+                }
+            }
+            return true;
+        } catch(e) { console.error(e); return true; }
     }
+
+    var loggedInMobile = localStorage.getItem("userMobile"); 
+    if (loggedInMobile) { fetchAndRouteUser(loggedInMobile); } else { goToPage('page-login'); checkGlobalSettings(); }
+
+    async function fetchAndRouteUser(mob) {
+        try {
+            var isAppLive = await checkGlobalSettings(); if(!isAppLive) return; 
+            var docSnap = await db.collection("users").doc(String(mob)).get();
+            if (docSnap.exists) {
+                var data = docSnap.data(); 
+                if (data.banUntil && (data.banUntil === 'perm' || data.banUntil > new Date().getTime())) {
+                    customAlert("🚫 आपका अकाउंट बैन है।"); localStorage.removeItem("userMobile"); goToPage('page-login'); return;
+                }
+                userCat = data.category || 'gramwasi'; globalUserName = data.name; isUserVerified = data.isVerified || false;
+                var tickHtml = isUserVerified ? '<span class="blue-tick">✅</span>' : '';
+                document.getElementById('user-name-display').innerHTML = "स्वागत है, " + data.name + tickHtml;
+                
+                document.getElementById('admin-icon-tempo').style.display = 'none'; 
+                document.getElementById('admin-icon-shop').style.display = 'none'; 
+                document.getElementById('admin-icon-sarpanch').style.display = 'none';
+
+                if(userCat === 'tempo') { document.getElementById('admin-icon-tempo').style.display = 'flex'; } 
+                else if(userCat === 'shop' || userCat === 'emitra' || userCat === 'other') { document.getElementById('admin-icon-shop').style.display = 'flex'; } 
+                else if(userCat === 'sarpanch' || userCat === 'panch') { document.getElementById('admin-icon-sarpanch').style.display = 'flex'; }
+                
+                goToPage('page-home'); 
+            } else { localStorage.removeItem("userMobile"); goToPage('page-login'); }
+        } catch (e) { console.error(e); customAlert("नेटवर्क समस्या।"); }
+    }
+
+    function refreshApp() { customAlert("🔄 डेटा रिफ्रेश हो रहा है..."); fetchAndRouteUser(localStorage.getItem("userMobile")); }
+
     // --- 200KB SMART IMAGE COMPRESSOR ---
     function compressImage(file, callback) { 
-        var reader = new FileReader(); 
-        reader.readAsDataURL(file); 
+        var reader = new FileReader(); reader.readAsDataURL(file); 
         reader.onload = function(event) { 
-            var img = new Image(); 
-            img.src = event.target.result; 
+            var img = new Image(); img.src = event.target.result; 
             img.onload = function() { 
-                var canvas = document.createElement('canvas'); 
-                var width = img.width; 
-                var height = img.height; 
-                
-                if(width > 800) { 
-                    height *= 800/width; 
-                    width = 800; 
-                } 
-                canvas.width = width; 
-                canvas.height = height; 
-                var ctx = canvas.getContext('2d'); 
-                ctx.drawImage(img, 0, 0, width, height); 
-                
-                var quality = 0.8; 
-                var dataUrl = canvas.toDataURL('image/jpeg', quality); 
-                
+                var canvas = document.createElement('canvas'); var width = img.width; var height = img.height; 
+                if(width > 800) { height *= 800/width; width = 800; } 
+                canvas.width = width; canvas.height = height; var ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height); 
+                var quality = 0.8; var dataUrl = canvas.toDataURL('image/jpeg', quality); 
                 while(Math.round((dataUrl.length * 0.75) / 1024) > 200 && quality > 0.1) { 
-                    quality -= 0.1; 
-                    dataUrl = canvas.toDataURL('image/jpeg', quality); 
+                    quality -= 0.1; dataUrl = canvas.toDataURL('image/jpeg', quality); 
                 } 
                 callback(dataUrl); 
             } 
         } 
     }
 
-    // --- LIVE LOCATION UPDATE (For Shop & Legacy Tempo) ---
+    // --- UPDATE SHOP STATUS (Tempo status is now inside saveTempoSettings) ---
     function updateSarthiStatus() { 
-        var isOpen = false; 
-        var textId = ''; 
-        if(userCat === 'shop' || userCat === 'emitra' || userCat === 'other') { 
-            isOpen = document.getElementById('shopToggle').checked; 
-            textId = 'shop-status-text'; 
+        var isOpen = false; var textId = ''; 
+        if(userCat !== 'tempo') { 
+            isOpen = document.getElementById('shopToggle').checked; textId = 'shop-status-text'; 
             var txtEl = document.getElementById(textId); 
             if(txtEl) { 
-                if(isOpen) { 
-                    txtEl.innerText = "चालू है"; 
-                    txtEl.style.color = "#28a745"; 
-                } else { 
-                    txtEl.innerText = "छुट्टी है (बंद)"; 
-                    txtEl.style.color = "#dc3545"; 
-                } 
+                if(isOpen) { txtEl.innerText = "चालू है"; txtEl.style.color = "#28a745"; } 
+                else { txtEl.innerText = "छुट्टी है (बंद)"; txtEl.style.color = "#dc3545"; } 
             } 
-            db.collection("users").doc(String(localStorage.getItem("userMobile"))).update({ isOpen: isOpen });
-        } 
-    }
-
-    function toggleLiveLocation(forceTurnOn) { 
-        var statusText = document.getElementById('loc-status-text'); 
-        var timeText = document.getElementById('loc-update-time'); 
-        var mob = localStorage.getItem("userMobile"); 
-        if(!mob) return; 
-        
-        if(forceTurnOn) { 
-            document.getElementById('liveLocToggle').checked = true;
-            statusText.innerText = "GPS कनेक्ट हो रहा है..."; 
-            statusText.style.color = "#f2994a"; 
-            sendLocationToDB(mob, statusText, timeText); 
-            gpsIntervalId = setInterval(function() { 
-                sendLocationToDB(mob, statusText, timeText); 
-            }, 30000); 
-        } else { 
-            if(gpsIntervalId) clearInterval(gpsIntervalId); 
-            statusText.innerText = "लोकेशन बंद है"; 
-            statusText.style.color = "#dc3545"; 
-            timeText.innerText = "लोकेशन शेयरिंग रोक दी गई है।"; 
-        } 
-    }
-
-    function sendLocationToDB(mob, statusText, timeText) { 
-        if (navigator.geolocation) { 
-            navigator.geolocation.getCurrentPosition(
-                function(position) { 
-                    statusText.innerText = "लोकेशन चालू है ✓ (30s अपडेट)"; 
-                    statusText.style.color = "#28a745"; 
-                    timeText.innerText = "आखिरी अपडेट: " + new Date().toLocaleTimeString(); 
-                    // Update both DBs for backward compatibility
-                    db.collection("users").doc(String(mob)).update({ lat: position.coords.latitude, lng: position.coords.longitude }); 
-                    rtdb.ref('users/' + mob).update({ lat: position.coords.latitude, lng: position.coords.longitude });
-                }, 
-                function(err) { 
-                    statusText.innerText = "कृपया फोन की GPS लोकेशन चालू करें!"; 
-                    statusText.style.color = "#dc3545"; 
-                    document.getElementById('liveLocToggle').checked = false; 
-                }, 
-                { enableHighAccuracy: true }
-            ); 
-        } else { 
-            customAlert("आपका फोन GPS सपोर्ट नहीं करता।"); 
-            document.getElementById('liveLocToggle').checked = false; 
+            db.collection("users").doc(String(localStorage.getItem("userMobile"))).update({ isOpen: isOpen }); 
         } 
     }
 
@@ -872,7 +707,6 @@
     function addNewTripBox() {
         tripCount++;
         const container = document.getElementById('all-trips-container');
-        
         const tripDiv = document.createElement('div');
         tripDiv.className = 'trip-row';
         tripDiv.id = 'trip-' + tripCount;
@@ -886,31 +720,26 @@
         html += `
             <div class="input-group" style="display: flex; justify-content: space-between;">
                 <div style="width: 48%;">
-                    <label style="font-size: 13px; color: #555; font-weight: 600;">जालेऊ से फतेहपुर का समय:</label>
+                    <label style="font-size: 13px; color: #555; font-weight: 600;">जालेऊ से फतेहपुर:</label>
                     <input type="time" id="r${tripCount}Go" style="width: 100%; padding: 10px; margin-top: 5px; border: 2px solid #e0e0e0; border-radius: 8px; box-sizing: border-box; font-size: 15px; outline: none;">
                 </div>
                 <div style="width: 48%;">
-                    <label style="font-size: 13px; color: #555; font-weight: 600;">फतेहपुर से जालेऊ का समय:</label>
+                    <label style="font-size: 13px; color: #555; font-weight: 600;">फतेहपुर से जालेऊ:</label>
                     <input type="time" id="r${tripCount}Back" style="width: 100%; padding: 10px; margin-top: 5px; border: 2px solid #e0e0e0; border-radius: 8px; box-sizing: border-box; font-size: 15px; outline: none;">
                 </div>
             </div>
         `;
-        
         tripDiv.innerHTML = html;
         container.appendChild(tripDiv);
     }
 
     function removeTripBox(id) {
         const element = document.getElementById('trip-' + id);
-        if(element) {
-            element.remove();
-        }
+        if(element) element.remove();
     }
     // --- DYNAMIC LISTS ---
     function openDynamicList(type, titleText) {
-        currentCategory = type; 
-        goToPage('page-dynamic-list'); 
-        var bg = document.getElementById('dynamic-header-bg'); 
+        currentCategory = type; goToPage('page-dynamic-list'); var bg = document.getElementById('dynamic-header-bg'); 
         
         document.getElementById('dyn-search-box').value = '';
         document.getElementById('btn-dyn-load-more').style.display = 'none';
@@ -927,11 +756,7 @@
         else bg.style.background = "var(--primary)";
         
         document.getElementById('dyn-title').innerText = titleText; 
-        
-        setTimeout(function() { 
-            document.getElementById('dyn-wait-text').style.display = 'none'; 
-            loadDynamicData(type); 
-        }, 1000);
+        setTimeout(function() { document.getElementById('dyn-wait-text').style.display = 'none'; loadDynamicData(type); }, 1000);
     }
 
     async function loadDynamicData(type) {
@@ -944,55 +769,37 @@
             else if(type === 'emergency') snap = await db.collection("emergency_contacts").get();
             else if(type === 'complaints_view') snap = await db.collection("complaints").get(); 
             else {
-                var categoriesToFetch = [type]; 
-                if(type === 'shop') categoriesToFetch = ['shop', 'emitra'];
+                var categoriesToFetch = [type]; if(type === 'shop') categoriesToFetch = ['shop', 'emitra'];
                 snap = await db.collection("users").where("category", "in", categoriesToFetch).get();
             }
 
-            if(snap.empty) { 
-                document.getElementById('dyn-list').innerHTML = "<p align='center'>अभी कोई जानकारी नहीं है।</p>"; 
-                return; 
-            }
+            if(snap.empty) { document.getElementById('dyn-list').innerHTML = "<p align='center'>अभी कोई जानकारी नहीं है।</p>"; return; }
             
             globalListCache = []; 
-            snap.forEach(function(docObj) { 
-                globalListCache.push({ id: docObj.id, data: docObj.data() }); 
-            });
+            snap.forEach(function(docObj) { globalListCache.push({ id: docObj.id, data: docObj.data() }); });
             
             globalListCache.sort(function(a,b) { 
-                var tA = a.data.timestamp ? a.data.timestamp.toMillis() : 0; 
-                var tB = b.data.timestamp ? b.data.timestamp.toMillis() : 0; 
-                return tB - tA; 
+                var tA = a.data.timestamp ? a.data.timestamp.toMillis() : 0; var tB = b.data.timestamp ? b.data.timestamp.toMillis() : 0; return tB - tA; 
             });
 
-            visibleListCount = 5; 
-            renderDynamicList();
-        } catch (e) { 
-            console.error("Error:", e); 
-        }
+            visibleListCount = 5; renderDynamicList();
+        } catch (e) { console.error("Error:", e); }
     }
 
     function renderDynamicList() {
-        var listDiv = document.getElementById('dyn-list'); 
-        listDiv.innerHTML = "";
+        var listDiv = document.getElementById('dyn-list'); listDiv.innerHTML = "";
         var query = document.getElementById('dyn-search-box').value.toLowerCase();
         
         var filteredData = globalListCache.filter(function(item) {
-            var d = item.data; 
-            var str = String(d.title||'')+" "+String(d.name||'')+" "+String(d.message||'')+" "+String(d.shopName||'')+" "+String(d.description||'')+" "+String(d.mobile||'');
+            var d = item.data; var str = String(d.title||'')+" "+String(d.name||'')+" "+String(d.message||'')+" "+String(d.shopName||'')+" "+String(d.description||'')+" "+String(d.mobile||'');
             return str.toLowerCase().includes(query);
         });
 
         var displayData = filteredData.slice(0, visibleListCount);
-        if(displayData.length === 0) { 
-            listDiv.innerHTML = "<p align='center'>सर्च में कुछ नहीं मिला।</p>"; 
-        }
+        if(displayData.length === 0) { listDiv.innerHTML = "<p align='center'>सर्च में कुछ नहीं मिला।</p>"; }
         
         displayData.forEach(function(item) {
-            var d = item.data; 
-            var id = item.id; 
-            var html = ''; 
-            var dateStr = (d.timestamp && d.timestamp.toDate) ? d.timestamp.toDate().toLocaleDateString() : '';
+            var d = item.data; var id = item.id; var html = ''; var dateStr = (d.timestamp && d.timestamp.toDate) ? d.timestamp.toDate().toLocaleDateString() : '';
 
             if(currentCategory === 'notices') {
                 var sarpDel = (userCat === 'sarpanch') ? `<button onclick="db.collection('notices').doc('${id}').delete().then(function(){openDynamicList('notices', 'सूचना केंद्र')})" style="background:red; color:white; border:none; padding:5px; border-radius:5px; float:right; cursor:pointer;">🗑️ हटाएं</button>` : '';
@@ -1013,46 +820,37 @@
                 html = `<div class="list-item" style="border-left-color:${currentCategory==='diary'?'#8E2DE2':'#dc3545'};"><div class="list-title">${d.name || d.title}</div><p style="font-size:13px; color:#666; margin-top:5px;">${d.title?d.name:''}</p><a href="tel:${link}" class="main-btn" style="background:${currentCategory==='diary'?'#8E2DE2':'#dc3545'}; text-align:center; text-decoration:none; padding:10px; margin-top:10px; display:block; color:white;">📞 ${link}</a></div>`;
             }
             else if(currentCategory === 'complaints_view') { 
-                var imgHTML = d.photoBase64 ? `<img src="${d.photoBase64}" style="width:100%; border-radius:10px; margin-top:10px; cursor:pointer;" onclick="openFullscreenImage('${d.photoBase64}')">` : ''; 
-                var replyKey = d.reply || '';
+                var imgHTML = d.photoBase64 ? `<img src="${d.photoBase64}" style="width:100%; border-radius:10px; margin-top:10px; cursor:pointer;" onclick="openFullscreenImage('${d.photoBase64}')">` : ''; var replyKey = d.reply || '';
                 html = `<div class="list-item" style="border-left-color:#dc3545;"><div class="list-title">${d.title} <span style="font-size:11px; color:#666;">${dateStr}</span></div><div style="font-size:12px; color:#0056b3; margin-top:4px;">👤 प्रेषक: ${d.userName} (${d.userMobile})</div><div class="list-desc" style="display:block; border-top:none; padding:0; margin-top:10px; color:#222;">${d.description}</div>${imgHTML}<div style="background:#f8f9fa; padding:10px; border-radius:8px; margin-top:10px; border:1px solid #ddd;"><textarea id="sarp-reply-${id}" style="width:100%; padding:8px; font-size:12px; border-radius:5px; border:1px solid #ccc; outline:none;" rows="2" placeholder="अपना जवाब यहाँ लिखें...">${replyKey}</textarea><button onclick="sarpanchSendReply('${id}')" style="background:var(--primary); color:white; border:none; padding:8px; width:100%; border-radius:5px; margin-top:5px; cursor:pointer; font-weight:bold;">✅ जवाब भेजें (Reply)</button></div></div>`;
             }
             else {
                 var statusHTML = "";
-                if (currentCategory === 'tempo' && d.todayStatus) {
-                    statusHTML = d.todayStatus === "चालू (Active)" ? `<span style="color:green; font-size:11px;">🟢 चालू है</span>` : `<span style="color:red; font-size:11px;">🔴 छुट्टी है</span>`;
+                if (currentCategory === 'tempo') {
+                    statusHTML = d.todayStatus === "छुट्टी (Leave)" ? `<span style="color:red; font-size:11px;">🔴 छुट्टी है</span>` : `<span style="color:green; font-size:11px;">🟢 चालू है</span>`;
                 } else {
                     statusHTML = d.isOpen !== false ? `<span style="color:green; font-size:11px;">🟢 चालू है</span>` : `<span style="color:red; font-size:11px;">🔴 छुट्टी है</span>`; 
                 }
-                
                 var displayName = d.shopName || d.name; 
                 html = `<div class="list-item" onclick="openSarthiDetails('${id}', '${currentCategory}')"><div class="list-title">${displayName} ${statusHTML}</div><div style="font-size:13px; color:#666; margin-top:5px;">👤 संचालक: ${d.name}</div><div style="margin-top:10px; font-size:12px; color:var(--sarthi); font-weight:bold; text-align:right;">पूरी जानकारी ❯</div></div>`;
             }
             listDiv.innerHTML += html;
         });
-
         document.getElementById('btn-dyn-load-more').style.display = (filteredData.length > visibleListCount) ? 'block' : 'none';
     }
 
     function handleUserSearch() { visibleListCount = 5; renderDynamicList(); }
     function loadMoreUserData() { visibleListCount += 10; renderDynamicList(); }
-    function openAddForm() {
-        if(currentCategory === 'choupal') goToPage('page-add-choupal');
-        else if(currentCategory === 'olx') goToPage('page-add-olx');
-    }
+    function openAddForm() { if(currentCategory === 'choupal') goToPage('page-add-choupal'); else if(currentCategory === 'olx') goToPage('page-add-olx'); }
 
-    // --- SARPANCH CONTROLS & SUBMIT FORMS ---
+    // --- SARPANCH CONTROLS & FORMS ---
     function openSarpanchPanel() { goToPage('page-sarpanch-panel'); }
-    
     function sarpanchSendNotice() {
-        var title = document.getElementById('sarp-notice-title').value; 
-        var desc = document.getElementById('sarp-notice-desc').value;
+        var title = document.getElementById('sarp-notice-title').value; var desc = document.getElementById('sarp-notice-desc').value;
         if(!title || !desc) return customAlert("⚠️ विषय और जानकारी दोनों ज़रूरी हैं!");
         db.collection("notices").add({ title: title, description: desc, authorName: globalUserName, authorMobile: localStorage.getItem("userMobile"), timestamp: firebase.firestore.FieldValue.serverTimestamp() }).then(function() {
             customAlert("✅ नोटिस पूरे गाँव को भेज दिया गया है!"); document.getElementById('sarp-notice-title').value = ''; document.getElementById('sarp-notice-desc').value = ''; goToPage('page-home'); 
         });
     }
-    
     function sarpanchSendReply(docId) {
         var replyText = document.getElementById(`sarp-reply-${docId}`).value;
         if(!replyText) return customAlert("⚠️ कृपया जवाब लिखें!");
@@ -1060,13 +858,11 @@
     }
 
     function submitChoupalPost() { 
-        var msg = document.getElementById('choupal-post-text').value; 
-        if(!msg) return customAlert("⚠️ कृपया संदेश लिखें!"); 
+        var msg = document.getElementById('choupal-post-text').value; if(!msg) return customAlert("⚠️ कृपया संदेश लिखें!"); 
         db.collection("choupal_posts").add({ message: msg, authorName: globalUserName, userMobile: localStorage.getItem("userMobile"), isVerified: isUserVerified, timestamp: firebase.firestore.FieldValue.serverTimestamp() }).then(function() {
             customAlert("✅ पोस्ट हो गया!"); document.getElementById('choupal-post-text').value = ''; openDynamicList('choupal', 'ई-चौपाल (पब्लिक)'); 
         });
     }
-
     function submitOlxData() { 
         var t = document.getElementById('olx-title').value; var p = document.getElementById('olx-price').value; var d = document.getElementById('olx-desc').value; var f = document.getElementById('olx-photo'); 
         if(!t || !p) return customAlert("⚠️ टाइटल और कीमत भरें!"); 
@@ -1079,88 +875,64 @@
         }; 
         if(f.files.length > 0) { compressImage(f.files[0], saveOlx); } else { saveOlx(null); }
     }
-
     function submitComplaintData() { 
         var title = document.getElementById('comp-title').value; var desc = document.getElementById('comp-desc').value; var fileInput = document.getElementById('comp-photo'); 
-        if(!title || !desc) return customAlert("⚠️ विषय और विवरण भरें!"); 
-        document.getElementById('btn-submit-comp').innerText = "भेजा जा रहा..."; 
+        if(!title || !desc) return customAlert("⚠️ विषय और विवरण भरें!"); document.getElementById('btn-submit-comp').innerText = "भेजा जा रहा..."; 
         var saveComplaint = function(base64Img) { 
             db.collection("complaints").add({ userMobile: localStorage.getItem("userMobile"), userName: globalUserName, title: title, description: desc, photoBase64: base64Img, timestamp: firebase.firestore.FieldValue.serverTimestamp(), status: "Pending" }).then(function() {
                 customAlert("✅ शिकायत दर्ज हो गई है!"); document.getElementById('comp-title').value = ""; document.getElementById('comp-desc').value = ""; fileInput.value = ""; openMyPortal('complaint'); 
-            });
-            document.getElementById('btn-submit-comp').innerText = "शिकायत भेजें"; 
+            }); document.getElementById('btn-submit-comp').innerText = "शिकायत भेजें"; 
         }; 
         if(fileInput.files.length > 0) { compressImage(fileInput.files[0], saveComplaint); } else { saveComplaint(null); } 
     }
-
     function submitDeveloperData() { 
         var title = document.getElementById('dev-title').value; var desc = document.getElementById('dev-desc').value; var fileInput = document.getElementById('dev-photo'); 
-        if(!title || !desc) return customAlert("⚠️ विषय और विवरण भरें!"); 
-        document.getElementById('btn-submit-dev').innerText = "भेजा जा रहा..."; 
+        if(!title || !desc) return customAlert("⚠️ विषय और विवरण भरें!"); document.getElementById('btn-submit-dev').innerText = "भेजा जा रहा..."; 
         var saveReport = function(base64Img) { 
             db.collection("app_issues").add({ userMobile: localStorage.getItem("userMobile"), userName: globalUserName, title: title, description: desc, photoBase64: base64Img, timestamp: firebase.firestore.FieldValue.serverTimestamp() }).then(function() {
                 customAlert("✅ रिपोर्ट भेज दी गई!"); document.getElementById('dev-title').value = ""; document.getElementById('dev-desc').value = ""; fileInput.value = ""; openMyPortal('dev'); 
-            });
-            document.getElementById('btn-submit-dev').innerText = "रिपोर्ट भेजें"; 
+            }); document.getElementById('btn-submit-dev').innerText = "रिपोर्ट भेजें"; 
         }; 
         if(fileInput.files.length > 0) { compressImage(fileInput.files[0], saveReport); } else { saveReport(null); } 
     }
     // --- LOCKER & COMPLAINTS VIEW ---
     function openLocker() {
-        goToPage('page-locker'); 
-        var listDiv = document.getElementById('locker-list'); 
-        listDiv.innerHTML = "<p align='center'>लॉकर चेक किया जा रहा है...</p>";
-        
+        goToPage('page-locker'); var listDiv = document.getElementById('locker-list'); listDiv.innerHTML = "<p align='center'>लॉकर चेक किया जा रहा है...</p>";
         db.collection("digital_locker").where("userMobile", "==", localStorage.getItem("userMobile")).get().then(function(snap) {
-            if(snap.empty) { 
-                listDiv.innerHTML = "<p align='center'>कोई डॉक्यूमेंट नहीं है।</p>"; 
-                document.getElementById('badge-locker').style.display='none'; 
-                return; 
-            }
-            listDiv.innerHTML = ""; 
-            document.getElementById('badge-locker').style.display='block';
+            if(snap.empty) { listDiv.innerHTML = "<p align='center'>कोई डॉक्यूमेंट नहीं है।</p>"; document.getElementById('badge-locker').style.display='none'; return; }
+            listDiv.innerHTML = ""; document.getElementById('badge-locker').style.display='block';
             snap.forEach(function(docObj) { 
-                var d = docObj.data(); 
-                var dateStr = (d.timestamp && d.timestamp.toDate) ? d.timestamp.toDate().toLocaleDateString() : ''; 
+                var d = docObj.data(); var dateStr = (d.timestamp && d.timestamp.toDate) ? d.timestamp.toDate().toLocaleDateString() : ''; 
                 listDiv.innerHTML += `<div class="list-item" style="border-left-color:#19547b;"><div class="list-title">📄 ${d.documentName} <span style="font-size:11px;">${dateStr}</span></div><img src="${d.docBase64}" style="width:100%; border-radius:8px; margin-top:10px; border:1px solid #ddd; cursor:pointer;" onclick="openFullscreenImage('${d.docBase64}')"></div>`; 
             });
         });
     }
 
     function openMyPortal(type) { 
-        var targetPage = type === 'complaint' ? 'page-complaint' : 'page-developer'; 
-        goToPage(targetPage); 
-        var listDiv = document.getElementById(type === 'complaint' ? 'my-complaints-list' : 'my-dev-replies-list'); 
-        if(!listDiv) return; 
-        
+        var targetPage = type === 'complaint' ? 'page-complaint' : 'page-developer'; goToPage(targetPage); 
+        var listDiv = document.getElementById(type === 'complaint' ? 'my-complaints-list' : 'my-dev-replies-list'); if(!listDiv) return; 
         listDiv.innerHTML = "<p align='center'>लोड हो रहा है...</p>"; 
         db.collection(type === 'complaint' ? 'complaints' : 'app_issues').where("userMobile", "==", localStorage.getItem("userMobile")).get().then(function(snap) { 
             if(snap.empty) { listDiv.innerHTML = "<p align='center' style='font-size:12px;'>कोई रिपोर्ट दर्ज नहीं की है।</p>"; return; } 
             listDiv.innerHTML = ""; 
             snap.forEach(function(docObj) { 
-                var data = docObj.data(); 
-                var replyKey = type === 'complaint' ? data.reply : data.dev_reply; 
-                var fromTxt = type === 'complaint' ? 'सरपंच' : 'डेवलपर'; 
+                var data = docObj.data(); var replyKey = type === 'complaint' ? data.reply : data.dev_reply; var fromTxt = type === 'complaint' ? 'सरपंच' : 'डेवलपर'; 
                 var replyHTML = replyKey ? `<div class="reply-box"><b>${fromTxt} का जवाब:</b> ${replyKey}</div>` : `<div class="reply-box" style="border-left-color:#ff9900;"><b>स्थिति:</b> पेंडिंग।</div>`; 
                 listDiv.innerHTML += `<div class="list-item" style="padding:10px; margin:5px 0;"><div class="list-title" style="font-size:14px;">${data.title}</div><div class="list-desc" style="display:block; border-top:none; padding:0;">${data.description}</div>${replyHTML}</div>`; 
             }); 
         }).catch(function(err) { listDiv.innerHTML = "<p align='center'>डेटा नहीं मिला।</p>"; }); 
     }
 
-    // --- TEMPO & SHOP DETAILS (📍 WITH REALTIME DB FETCHING) ---
+    // --- TEMPO DETAILS (📍 REALTIME DB LOCATION TRACKING) ---
     function getDistance(lat1, lon1, lat2, lon2) { 
-        var R = 6371; 
-        var dLat = (lat2 - lat1) * Math.PI / 180; 
-        var dLon = (lon2 - lon1) * Math.PI / 180; 
+        var R = 6371; var dLat = (lat2 - lat1) * Math.PI / 180; var dLon = (lon2 - lon1) * Math.PI / 180; 
         var a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2); 
         return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))) * 1000; 
     }
     
     function formatTime(timeStr) { 
-        if(!timeStr) return 'सेट नहीं'; 
-        var pts = timeStr.split(':'); var h = parseInt(pts[0]); var m = pts[1]; 
-        var ampm = h >= 12 ? 'PM' : 'AM'; h = h % 12 || 12; 
-        return `${h}:${m} ${ampm}`; 
+        if(!timeStr) return 'सेट नहीं'; var pts = timeStr.split(':'); var h = parseInt(pts[0]); var m = pts[1]; 
+        var ampm = h >= 12 ? 'PM' : 'AM'; h = h % 12 || 12; return `${h}:${m} ${ampm}`; 
     }
 
     function openSarthiDetails(uid, type) {
@@ -1169,18 +941,14 @@
         var topTitle = document.getElementById('details-top-title'); 
         var headerBg = document.getElementById('details-header-bg');
         
-        if(type === 'tempo') { 
-            headerBg.style.background = "linear-gradient(135deg,#f2994a,#f2c94c)"; topTitle.innerText = "टेम्पो विवरण"; 
-        } else { 
-            headerBg.style.background = "linear-gradient(135deg,#7f00ff,#e100ff)"; topTitle.innerText = "सेवा विवरण"; 
-        }
+        if(type === 'tempo') { headerBg.style.background = "linear-gradient(135deg,#f2994a,#f2c94c)"; topTitle.innerText = "टेम्पो विवरण"; } 
+        else { headerBg.style.background = "linear-gradient(135deg,#7f00ff,#e100ff)"; topTitle.innerText = "सेवा विवरण"; }
         
         contentDiv.innerHTML = "<p align='center'>डेटाबेस से जानकारी लायी जा रही है...</p>";
         
         db.collection("users").doc(uid).get().then(function(docSnap) {
             if(docSnap.exists) {
-                var data = docSnap.data(); 
-                var shopName = data.shopName || data.name;
+                var data = docSnap.data(); var shopName = data.shopName || data.name;
                 var html = `<h3 style="color:#333; margin-bottom:5px;">${shopName}</h3>`;
 
                 if(type !== 'tempo') {
@@ -1193,16 +961,13 @@
                         data.services.forEach(function(srv) { 
                             var docStr = srv.docs ? `<br><span style="color:#666; font-size:11px;"><i>डॉक्यूमेंट्स: ${srv.docs}</i></span>` : ''; 
                             html += `<li style="margin-bottom:8px;"><b>${srv.name}</b> <br><span style="color:#0056b3; font-size:12px; font-weight:bold;">प्राइज़ / फीस: ₹${srv.fee || '0'}</span>${docStr}</li>`; 
-                        }); 
-                        html += `</ul></div>`; 
+                        }); html += `</ul></div>`; 
                     }
                 } else if(type === 'tempo') {
                     var tStatus = data.todayStatus === "छुट्टी (Leave)" ? "<span style='color:red; font-weight:bold;'>🔴 आज छुट्टी है</span>" : "<span style='color:green; font-weight:bold;'>🟢 आज चालू है</span>";
-                    
                     html += `<p style="font-size:13px;">${tStatus}</p><hr style="margin:15px 0; border:0; border-top:1px solid #eee;"><div style="line-height:1.8; font-size:14px;"><p><b>👤 संचालक:</b> ${data.name}</p><p><b>📞 मोबाइल:</b> <a href="tel:${data.mobile}" style="color:var(--sarthi); font-weight:bold; text-decoration:none;">${data.mobile}</a></p>`;
 
                     html += `<div style="background:#f0f8ff; padding:15px; border-radius:10px; margin-top:15px;"><b>⏳ आज की फेरी (Rounds):</b><ul style="padding-left:20px; line-height:1.6; margin-top:10px; color:#444;">`;
-                    
                     if(data.trips && Object.keys(data.trips).length > 0) {
                         var tripCountLoaded = Object.keys(data.trips).length / 2;
                         for(let i=1; i<=tripCountLoaded; i++) {
@@ -1212,15 +977,12 @@
                         }
                     } else if (data.jaleuToFatehpur || data.fatehpurToJaleu) {
                         html += `<li style="margin-bottom:8px;"><b>फेरी 1:</b><br><span style="color:#0056b3; font-size:12px;">जालेऊ से: ${formatTime(data.jaleuToFatehpur)} | फतेहपुर से: ${formatTime(data.fatehpurToJaleu)}</span></li>`;
-                    } else {
-                        html += `<li style="margin-bottom:8px; color:#666; font-size:12px;">अभी कोई समय सेट नहीं है।</li>`;
-                    }
+                    } else { html += `<li style="margin-bottom:8px; color:#666; font-size:12px;">अभी कोई समय सेट नहीं है।</li>`; }
                     html += `</ul></div>`;
 
                     html += `<button onclick="refreshTempoLocation('${uid}')" id="btn-tempo-ref" style="background:#28a745; color:white; border:none; padding:10px; border-radius:8px; margin-top:15px; font-weight:bold; cursor:pointer; width:100%; box-shadow: 0px 4px 6px rgba(40,167,69,0.3);">🔄 लाइव लोकेशन रिफ्रेश करें</button><div id="tempo-loc-data">${renderTempoLocationHTML(data)}</div>`;
                 }
-                html += `</div>`; 
-                contentDiv.innerHTML = html;
+                html += `</div>`; contentDiv.innerHTML = html;
             } else { contentDiv.innerHTML = "<p align='center'>खाता नहीं मिला!</p>"; }
         });
     }
@@ -1237,54 +999,35 @@
             tempoStops.forEach(function(stop, index) { 
                 var isPassed = index < closestIndex; var isCurrent = index === closestIndex; 
                 var color = isPassed ? "#28a745" : (isCurrent ? "#ff9966" : "#ddd"); 
-                var fw = isCurrent ? "bold" : "normal"; 
-                var dotShadow = isCurrent ? "box-shadow: 0 0 0 4px rgba(255,153,102,0.3);" : ""; 
+                var fw = isCurrent ? "bold" : "normal"; var dotShadow = isCurrent ? "box-shadow: 0 0 0 4px rgba(255,153,102,0.3);" : ""; 
                 var tempoIcon = isCurrent ? `<div class="tempo-marker">🛺</div>` : ``; 
                 html += `<div class="stop-point">${tempoIcon}<div class="stop-dot" style="background: ${color}; ${dotShadow}"></div><div class="stop-name" style="font-weight: ${fw}; color: ${isCurrent ? '#333' : '#666'};">${stop.name}</div>${isCurrent && minDistance < 1000 ? `<div style="font-size:11px; color:#ff9966; margin-top:2px;">अभी यहाँ है (लगभग ${Math.round(minDistance)} मीटर दूर)</div>` : ''}</div>`; 
-            });
-            html += `</div></div>`; 
-        } else { 
-            html += `<div style="background:#fff3cd; border:1px solid #ffeeba; padding:12px; border-radius:12px; margin-top:20px; font-size:13px; color:#856404; text-align:center;"><i>📍 लाइव लोकेशन अभी उपलब्ध नहीं है (या गाड़ी खड़ी है)।</i></div>`; 
-        }
+            }); html += `</div></div>`; 
+        } else { html += `<div style="background:#fff3cd; border:1px solid #ffeeba; padding:12px; border-radius:12px; margin-top:20px; font-size:13px; color:#856404; text-align:center;"><i>📍 लाइव लोकेशन अभी उपलब्ध नहीं है (या गाड़ी खड़ी है)।</i></div>`; }
         return html;
     }
 
-    // 📍 FIXED: अब यह रियलटाइम डेटाबेस (Realtime Database) से सटीक लोकेशन मँगवाएगा!
+    // 📍 FIXED: Realtime Database Connection
     function refreshTempoLocation(uid) {
-        var btn = document.getElementById('btn-tempo-ref'); 
-        var div = document.getElementById('tempo-loc-data');
-        btn.innerText = "⏳ रिफ्रेश हो रहा है..."; 
-        btn.style.background = "#6c757d";
-        
+        var btn = document.getElementById('btn-tempo-ref'); var div = document.getElementById('tempo-loc-data');
+        btn.innerText = "⏳ रिफ्रेश हो रहा है..."; btn.style.background = "#6c757d";
         db.collection("users").doc(uid).get().then(function(fsSnap) {
             if(fsSnap.exists) { 
                 var fsData = fsSnap.data();
-                
-                // Realtime Database से लोकेशन लाना
                 rtdb.ref("users/" + uid).once("value").then(function(rtSnap) {
                     var rtData = rtSnap.val() || {};
-                    // Firestore के डेटा में Realtime वाली लोकेशन जोड़ना
-                    fsData.lat = rtData.lat || null;
-                    fsData.lng = rtData.lng || null;
-                    
+                    fsData.lat = rtData.lat || null; fsData.lng = rtData.lng || null;
                     div.innerHTML = renderTempoLocationHTML(fsData); 
-                    
-                    btn.innerText = "✅ लोकेशन अपडेट हो गई"; 
-                    btn.style.background = "#28a745"; 
-                    setTimeout(function() { 
-                        btn.innerText = "🔄 लाइव लोकेशन रिफ्रेश करें"; 
-                        btn.style.background = "#28a745"; 
-                    }, 2000); 
+                    btn.innerText = "✅ लोकेशन अपडेट हो गई"; btn.style.background = "#28a745"; 
+                    setTimeout(function() { btn.innerText = "🔄 लाइव लोकेशन रिफ्रेश करें"; btn.style.background = "#28a745"; }, 2000); 
                 }).catch(function(error) {
-                    console.error("Realtime DB Error: ", error);
-                    btn.innerText = "❌ लोकेशन नहीं मिली"; 
-                    btn.style.background = "#dc3545"; 
+                    console.error("RTDB Error: ", error); btn.innerText = "❌ लोकेशन नहीं मिली"; btn.style.background = "#dc3545"; 
                 });
             }
         });
     }
 
-    // --- SHOP / TEMPO SETTINGS FUNCTIONS ---
+    // --- SHOP & TEMPO SETTINGS ---
     function openShopSettings() { 
         goToPage('page-shop-settings'); 
         db.collection("users").doc(String(localStorage.getItem("userMobile"))).get().then(function(docSnap) {
@@ -1296,8 +1039,7 @@
                 document.getElementById('set-shop-name').value = docSnap.data().shopName || ''; 
                 document.getElementById('shop-open-time').value = docSnap.data().openTime || ''; 
                 document.getElementById('shop-close-time').value = docSnap.data().closeTime || ''; 
-                currentShopServices = docSnap.data().services || []; 
-                renderManageServices(); 
+                currentShopServices = docSnap.data().services || []; renderManageServices(); 
             } 
         });
     }
@@ -1306,12 +1048,9 @@
     function renderManageServices() { 
         var div = document.getElementById('manage-services-div'); div.innerHTML = ""; 
         if(currentShopServices.length === 0) { div.innerHTML = "<p style='font-size:12px; color:#666; text-align:center;'>कोई सामग्री नहीं है।</p>"; return; } 
-        currentShopServices.forEach(function(srv, index) { 
-            div.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #ddd; padding:8px 0; font-size:13px;"><span><b>${srv.name}</b> (₹${srv.fee})</span> <button onclick="removeService(${index})" style="background:red; color:white; border:none; border-radius:4px; padding:4px 8px; cursor:pointer;">🗑️ हटाएं</button></div>`; 
-        }); 
+        currentShopServices.forEach(function(srv, index) { div.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #ddd; padding:8px 0; font-size:13px;"><span><b>${srv.name}</b> (₹${srv.fee})</span> <button onclick="removeService(${index})" style="background:red; color:white; border:none; border-radius:4px; padding:4px 8px; cursor:pointer;">🗑️ हटाएं</button></div>`; }); 
     }
     function removeService(index) { currentShopServices.splice(index, 1); renderManageServices(); }
-
     function saveShopData() { 
         var sName = document.getElementById('set-shop-name').value; var oTime = document.getElementById('shop-open-time').value; var cTime = document.getElementById('shop-close-time').value; var newName = document.getElementById('new-srv-name').value; var newFee = document.getElementById('new-srv-fee').value; var newDocs = document.getElementById('new-srv-docs') ? document.getElementById('new-srv-docs').value : ''; 
         if(newName) { currentShopServices.push({ name: newName, fee: newFee, docs: newDocs }); } 
@@ -1320,98 +1059,52 @@
         });
     }
 
-    // 🛺 NEW: Tempo Settings Loader & Saver
     function openTempoSettings() { 
-        goToPage('page-tempo-settings'); 
-        document.getElementById('all-trips-container').innerHTML = '';
-        tripCount = 0;
-        
+        goToPage('page-tempo-settings'); document.getElementById('all-trips-container').innerHTML = ''; tripCount = 0;
         db.collection("users").doc(String(localStorage.getItem("userMobile"))).get().then(function(docSnap) {
             if(docSnap.exists) { 
                 var data = docSnap.data();
-                
-                if(data.todayStatus === "छुट्टी (Leave)") {
-                    document.getElementById('status-leave').checked = true;
-                } else {
-                    document.getElementById('status-active').checked = true;
-                }
-                
+                if(data.todayStatus === "छुट्टी (Leave)") { document.getElementById('status-leave').checked = true; } 
+                else { document.getElementById('status-active').checked = true; }
                 document.getElementById('set-tempo-name').value = data.shopName || ''; 
-                
                 if (data.trips && Object.keys(data.trips).length > 0) {
                     var numTrips = Object.keys(data.trips).length / 2;
                     for(let i=1; i<=numTrips; i++) {
                         if(data.trips['r'+i+'Go'] || data.trips['r'+i+'Back']) {
-                            addNewTripBox();
-                            document.getElementById('r'+i+'Go').value = data.trips['r'+i+'Go'] || '';
-                            document.getElementById('r'+i+'Back').value = data.trips['r'+i+'Back'] || '';
+                            addNewTripBox(); document.getElementById('r'+i+'Go').value = data.trips['r'+i+'Go'] || ''; document.getElementById('r'+i+'Back').value = data.trips['r'+i+'Back'] || '';
                         }
                     }
-                } else {
-                    addNewTripBox(); 
-                }
-            } else {
-                addNewTripBox();
-            }
+                } else { addNewTripBox(); }
+            } else { addNewTripBox(); }
         });
     }
 
     function saveTempoSettings() { 
         var tName = document.getElementById('set-tempo-name').value; 
-        
-        let statusRadios = document.getElementsByName('driverStatus');
-        let selectedStatus = "चालू (Active)";
-        for (let radio of statusRadios) {
-            if (radio.checked) {
-                selectedStatus = radio.value;
-                break;
-            }
-        }
-
+        let statusRadios = document.getElementsByName('driverStatus'); let selectedStatus = "चालू (Active)";
+        for (let radio of statusRadios) { if (radio.checked) { selectedStatus = radio.value; break; } }
         let tripsData = {};
         for (let i = 1; i <= tripCount; i++) {
-            let goInput = document.getElementById('r' + i + 'Go');
-            let backInput = document.getElementById('r' + i + 'Back');
-            if (goInput && backInput) {
-                if(goInput.value) tripsData['r' + i + 'Go'] = goInput.value;
-                if(backInput.value) tripsData['r' + i + 'Back'] = backInput.value;
-            }
+            let goInput = document.getElementById('r' + i + 'Go'); let backInput = document.getElementById('r' + i + 'Back');
+            if (goInput && backInput) { if(goInput.value) tripsData['r' + i + 'Go'] = goInput.value; if(backInput.value) tripsData['r' + i + 'Back'] = backInput.value; }
         }
-        
         document.getElementById('statusMessage').innerText = '⏳ सेव हो रहा है...';
-        
-        db.collection("users").doc(String(localStorage.getItem("userMobile"))).update({ 
-            shopName: tName, 
-            trips: tripsData,
-            todayStatus: selectedStatus
-        }).then(function() {
-            customAlert("✅ आपकी सेटिंग्स और समय सेव हो गया!"); 
-            document.getElementById('statusMessage').innerText = '';
-            goToPage('page-home'); 
-        }).catch(function(e){
-            console.error(e);
-            customAlert("❌ कोई एरर आ गया!");
-        });
+        db.collection("users").doc(String(localStorage.getItem("userMobile"))).update({ shopName: tName, trips: tripsData, todayStatus: selectedStatus }).then(function() {
+            customAlert("✅ आपकी सेटिंग्स और समय सेव हो गया!"); document.getElementById('statusMessage').innerText = ''; goToPage('page-home'); 
+        }).catch(function(e){ console.error(e); customAlert("❌ कोई एरर आ गया!"); });
     }
 
-    // --- GALLERY FULLSCREEN ---
+    // --- GALLERY ---
     function openGallery() { 
-        goToPage('page-gallery'); 
-        var listDiv = document.getElementById('gallery-list'); 
-        listDiv.innerHTML = "<p align='center' style='grid-column:1/3;'>लोड हो रहा है...</p>"; 
-        
+        goToPage('page-gallery'); var listDiv = document.getElementById('gallery-list'); listDiv.innerHTML = "<p align='center' style='grid-column:1/3;'>लोड हो रहा है...</p>"; 
         db.collection("gallery").get().then(function(snap) {
             if(snap.empty) { listDiv.innerHTML = "<p align='center' style='grid-column:1/3;'>अभी कोई फोटो नहीं है।</p>"; return; } 
             listDiv.innerHTML = ""; 
             snap.forEach(function(docObj) { 
-                var data = docObj.data(); 
-                if(data.photoBase64) {
-                    listDiv.innerHTML += `<div><img src="${data.photoBase64}" class="gallery-img" onclick="openFullscreenImage('${data.photoBase64}')"><div style="font-size:11px; text-align:center; color:#555; margin-top:3px;">${data.title}</div></div>`; 
-                }
+                var data = docObj.data(); if(data.photoBase64) { listDiv.innerHTML += `<div><img src="${data.photoBase64}" class="gallery-img" onclick="openFullscreenImage('${data.photoBase64}')"><div style="font-size:11px; text-align:center; color:#555; margin-top:3px;">${data.title}</div></div>`; }
             }); 
         });
     }
-
     function openFullscreenImage(base64Str) { document.getElementById('gallery-fullscreen-img').src = base64Str; document.getElementById('gallery-modal').style.display = 'flex'; }
     function closeGalleryModal() { document.getElementById('gallery-modal').style.display = 'none'; }
     function downloadGalleryImage() { 
