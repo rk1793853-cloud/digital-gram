@@ -1,0 +1,1212 @@
+<!DOCTYPE html>
+<html lang="hi" translate="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="google" content="notranslate">
+<title>डिजिटल ग्राम जालेऊ - मास्टर ऐप (Turbo & Secure)</title>
+
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
+
+<style>
+    /* ==========================================
+       ⚡ TURBO PERFORMANCE & FIXED CSS
+       ========================================== */
+    :root { --primary: #28a745; --bg: #f4f7f6; --sarthi: #0056b3; }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+    
+    body { background-color: var(--bg); display: flex; justify-content: center; min-height: 100vh; }
+    
+    /* Navigation Bug Fixed: Removed transform from app-container */
+    .app-container { width: 100%; max-width: 400px; min-height: 100vh; position: relative; box-shadow: 0 0 20px rgba(0,0,0,0.1); overflow-x: hidden; background: transparent; padding-bottom: 0; }
+    
+    .page { display: none; width: 100%; min-height: 100vh; padding-bottom: 120px; } /* Padding increased so content doesn't hide behind nav */
+    .active-page { display: block; animation: fadeIn 0.2s ease-out forwards; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* ⏳ ANTI-CRASH GLOBAL LOADER */
+    .global-loader { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(255,255,255,0.95); z-index: 99999999; display: none; flex-direction: column; align-items: center; justify-content: center; }
+    .loader-spinner { border: 4px solid rgba(0,123,255,0.1); border-top: 4px solid #007bff; border-radius: 50%; width: 50px; height: 50px; animation: spin 0.8s linear infinite; margin-bottom: 15px; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    .loader-text { font-size: 16px; font-weight: bold; color: #007bff; letter-spacing: 1px; }
+
+    /* हेडर्स और बटन्स */
+    .header-bg { background: linear-gradient(135deg, var(--primary), #1e7e34); padding: 50px 20px 40px; text-align: center; color: white; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.15); }
+    .logo-img { width: 85px; height: 85px; background-color: white; border-radius: 50%; padding: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); margin-bottom: 10px; }
+    
+    .top-btn-left { position: absolute; left: 20px; top: 15px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 5px 12px; border-radius: 8px; font-size: 15px; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; z-index: 50; }
+    .top-btn-right { position: absolute; right: 20px; top: 15px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 5px 10px; border-radius: 8px; font-size: 13px; cursor: pointer; font-weight: bold; z-index: 50; }
+    .top-btn-left:active, .top-btn-right:active { transform: scale(0.9); }
+    
+    .content-box { background-color: white; margin: -20px 20px 20px; padding: 25px 20px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); z-index: 10; position: relative; }
+    
+    .input-group { margin-bottom: 15px; text-align: left; }
+    .input-group label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 6px; color: #555; }
+    .input-group input, .input-group select, .input-group textarea { width: 100%; padding: 13px; border: 1px solid #ddd; border-radius: 12px; outline: none; background: #fafafa; font-size: 14px; }
+    .input-group input:focus, .input-group textarea:focus { border-color: #007bff; }
+    
+    .main-btn { width: 100%; padding: 16px; border: none; border-radius: 12px; font-size: 16px; font-weight: 800; cursor: pointer; color: white; margin-top: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); transition: transform 0.1s; background: linear-gradient(45deg, #007bff, #00d2ff); }
+    .main-btn:active { transform: scale(0.95); }
+    .btn-green { background: linear-gradient(45deg, #28a745, #38ef7d); }
+    .btn-red { background: linear-gradient(45deg, #dc3545, #ff4b2b); }
+    .btn-dark { background: linear-gradient(45deg, #343a40, #182848); }
+    .btn-gold { background: linear-gradient(45deg, #ffd700, #ff9100); color: #000; }
+    .btn-blue { background: linear-gradient(45deg, #0056b3, #00c6ff); }
+
+    /* होम स्क्रीन ग्रिड */
+    .home-header { background: linear-gradient(135deg, var(--primary), #1e7e34); padding: 50px 20px 30px; color: white; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.15); position: relative; }
+    .home-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 10px 20px; }
+    .home-card { border-radius: 18px; padding: 18px 10px; text-align: center; color: white; font-weight: 700; font-size: 13px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; border: 1px solid rgba(255,255,255,0.2); transition: transform 0.1s; }
+    .home-card:active { transform: scale(0.95); }
+    .home-card span.icon { font-size: 32px; display: block; margin-bottom: 8px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)); }
+    .badge { position: absolute; top: 10px; right: 10px; background: #ff2a2a; color: white; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white; display: none; }
+    
+    .c-notice{background:linear-gradient(135deg,#ff512f,#dd2476);} 
+    .c-emitra{background:linear-gradient(135deg,#11998e,#38ef7d);} 
+    .c-complaint{background:linear-gradient(135deg,#cb2d3e,#ef473a);} 
+    .c-tempo{background:linear-gradient(135deg,#f2994a,#f2c94c);} 
+    .c-olx{background:linear-gradient(135deg,#f7971e,#ffd200);} 
+    .c-gallery{background:linear-gradient(135deg,#8e2de2,#4a00e0);} 
+    .c-dev{background:linear-gradient(135deg,#4b6cb7,#182848);} 
+    .c-emergency{background:linear-gradient(135deg,#ff416c,#ff4b2b);} 
+    .c-choupal{background:linear-gradient(135deg,#00c6ff,#0072ff);} 
+    .c-diary{background:linear-gradient(135deg,#8E2DE2,#4A00E0);} 
+    .c-sarpanch{background:linear-gradient(135deg,#f12711,#f5af19);} 
+    .c-polling{background:linear-gradient(135deg,#8e44ad,#3498db);}
+    .c-leaderboard{background:linear-gradient(135deg,#f5af19,#f12711);} 
+    .c-kyc{background:linear-gradient(135deg,#3498db,#2980b9);}
+    
+    /* AD BANNERS */
+    .banner-slider { width: 100%; overflow-x: auto; display: flex; gap: 10px; padding: 15px 20px 5px; scroll-snap-type: x mandatory; scrollbar-width: none; }
+    .banner-slider::-webkit-scrollbar { display: none; }
+    .banner-card { min-width: 90%; height: 140px; border-radius: 15px; scroll-snap-align: center; background-size: cover; background-position: center; position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border: 2px solid white; cursor: pointer; overflow: hidden; }
+    .banner-title { position: absolute; bottom: 0; left: 0; width: 100%; background: linear-gradient(transparent, rgba(0,0,0,0.8)); color: white; padding: 10px; font-size: 13px; font-weight: bold; text-align: left; }
+
+    /* LEADERBOARD LIST */
+    .leaderboard-item { display: flex; justify-content: space-between; align-items: center; background: white; padding: 15px; border-radius: 15px; margin-bottom: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-left: 5px solid #ffd700; }
+    .rank-badge { font-size: 24px; font-weight: bold; width: 35px; text-align: center; }
+
+    /* Toggles */
+    .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #dc3545; transition: .2s; border-radius: 34px; }
+    .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px; background-color: white; transition: .2s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+    input:checked + .slider { background-color: #28a745; }
+    input:checked + .slider:before { transform: translateX(24px); }
+
+    /* लिस्ट कंटेनर */
+    .list-container { padding: 10px; min-height: 50vh; }
+    .list-item { background: white; border-radius: 15px; padding: 15px; margin: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); display: flex; flex-direction: column; position: relative; overflow: hidden; border-left: 5px solid var(--primary); }
+    .list-title { font-weight: bold; font-size: 16px; color: #333; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+    .list-desc { font-size: 13px; color: #666; margin-top: 5px; white-space: pre-wrap; display: none; border-top: 1px solid #eee; padding-top: 10px; }
+    .reply-box { background: #f0f8ff; padding: 10px; border-radius: 10px; margin-top: 10px; font-size: 12px; border-left: 3px solid #0056b3; }
+    .blue-tick { color: #1da1f2; font-size: 14px; margin-left: 5px; }
+
+    .search-box { width: 100%; padding: 14px; border: 2px solid var(--primary); border-radius: 12px; margin-bottom: 15px; outline: none; font-size: 14px; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+    .load-more-btn { background: linear-gradient(45deg, #f8f9fa, #e9ecef); border: 2px dashed #adb5bd; color: #495057; width: 90%; padding: 12px; border-radius: 12px; font-weight: bold; cursor: pointer; margin: 15px auto; display: none; text-align: center; }
+    .load-more-btn:active { transform: scale(0.95); }
+
+    /* बॉटम नेविगेशन (Bug Fixed - Now properly positioned at bottom) */
+    .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 400px; background: white; display: flex; justify-content: space-around; padding: 10px 0 5px; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); border-top-left-radius: 20px; border-top-right-radius: 20px; z-index: 100; display: none; }
+    .nav-item { text-align: center; color: #888; cursor: pointer; font-size: 11px; font-weight: bold; flex: 1; }
+    .nav-item:active { transform: scale(0.9); color: var(--primary); }
+    .nav-item span.icon { font-size: 22px; display: block; margin-bottom: 2px; }
+
+    /* Floating Action Buttons (ई-चौपाल और OLX बटन फिक्स) */
+    .floating-bottom-btns { position: fixed; bottom: 75px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 360px; z-index: 90; display: none; flex-direction: column; gap: 10px; }
+
+    /* --- TEMPO TRACKING CSS --- */
+    .v-track-container { position: relative; padding-left: 45px; margin-top: 25px; margin-bottom: 20px; }
+    .v-track-line { position: absolute; left: 20px; top: 15px; bottom: 15px; width: 6px; background: #e9ecef; border-radius: 3px; z-index: 1; }
+    .v-track-progress { position: absolute; left: 20px; top: 15px; width: 6px; background: linear-gradient(to bottom, #28a745, #38ef7d); border-radius: 3px; z-index: 2; transition: height 0.3s ease; }
+    .v-tempo-icon { position: absolute; left: 0px; font-size: 32px; z-index: 10; transition: top 0.3s ease; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)); margin-top: -10px; }
+    .flip-icon { transform: scaleX(-1); }
+
+    /* गैलरी ग्रिड */
+    .gallery-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 10px; }
+    .gallery-img { width: 100%; height: 120px; object-fit: cover; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); cursor: pointer; }
+    .gallery-img:active { transform: scale(0.95); }
+
+    /* पॉपअप मॉडल्स */
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); z-index: 999999; display: none; align-items: center; justify-content: center; }
+    .modal-box { background: white; width: 85%; max-width: 320px; border-radius: 20px; padding: 25px 20px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3); animation: popIn 0.2s ease-out; max-height: 90vh; overflow-y: auto; }
+    @keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .modal-box h3 { margin-bottom: 12px; color: var(--primary); font-size: 18px; font-weight: 800; }
+    .modal-box p { font-size: 14px; color: #555; margin-bottom: 25px; line-height: 1.5; white-space: pre-wrap; }
+    .modal-btns { display: flex; justify-content: center; gap: 10px; }
+    .modal-btn { padding: 12px 20px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; flex: 1; font-size: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .ok-btn { background: linear-gradient(45deg, var(--primary), #38ef7d); color: white; }
+    .cancel-btn { background: linear-gradient(45deg, #dc3545, #ff4b2b); color: white; }
+
+    /* गैलरी फुलस्क्रीन व्यूअर */
+    .gallery-viewer { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.95); z-index: 9999999; display: none; flex-direction: column; align-items: center; justify-content: center; }
+    .gallery-viewer img { max-width: 95%; max-height: 75vh; border-radius: 12px; }
+    .viewer-btns { display: flex; gap: 20px; margin-top: 25px; width: 100%; justify-content: center; padding: 0 20px; }
+    .viewer-btn { padding: 12px 25px; border-radius: 30px; font-weight: bold; border: none; font-size: 14px; cursor: pointer; }
+
+    .full-screen-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: white; z-index: 9999999; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align: center; }
+    .full-screen-overlay h1 { color: #dc3545; font-size: 24px; margin-bottom: 15px; font-weight: 800; }
+    .full-screen-overlay p { color: #555; font-size: 15px; line-height: 1.6; margin-bottom: 25px; }
+    .wait-text { font-size: 13px; color: var(--primary); font-weight: bold; text-align: center; margin-bottom: 10px; display: none; }
+
+    /* INFO BOX & SHOP CSS */
+    .info-box { background: linear-gradient(to right, #fff3e0, #ffe0b2); border-left: 5px solid #ff9800; padding: 15px; border-radius: 10px; margin-bottom: 25px; font-size: 14px; color: #424242; line-height: 1.6; }
+    .info-box span { color: #d32f2f; font-weight: bold; background: #ffcdd2; padding: 2px 6px; border-radius: 6px; }
+    .status-container { display: flex; justify-content: space-between; background: #f4f7fb; padding: 10px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #cddcf6; }
+    .status-option { width: 48%; text-align: center; }
+    .status-option input[type="radio"] { display: none; }
+    .status-label { display: block; padding: 12px 5px; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 14px; border: 2px solid transparent; background-color: #fff; color: #555; transition: 0.2s; }
+    #status-active:checked + .status-label { background-color: #d4edda; border-color: #28a745; color: #155724; }
+    #status-leave:checked + .status-label { background-color: #f8d7da; border-color: #dc3545; color: #721c24; }
+    
+    .trip-row { background: #f8f9fa; border: 1px solid #dee2e6; padding: 15px; border-radius: 12px; margin-bottom: 15px; position: relative; }
+    .add-trip-btn { width: 100%; padding: 14px; background: linear-gradient(to right, #f7971e, #ffd200); color: #fff; border: none; border-radius: 50px; font-size: 15px; font-weight: bold; cursor: pointer; margin-bottom: 15px; transition: transform 0.1s; }
+    .add-trip-btn:active { transform: scale(0.95); }
+    .save-btn { width: 100%; padding: 16px; background: linear-gradient(to right, #11998e, #38ef7d); color: white; border: none; border-radius: 50px; font-size: 16px; font-weight: 800; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; margin-top: 10px; transition: transform 0.1s; }
+    .save-btn:active { transform: scale(0.95); }
+    
+    /* POLLING SYSTEM CSS */
+    .poll-card { background: white; border-radius: 18px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border-left: 6px solid #8e44ad; }
+    .poll-title { font-size: 16px; font-weight: 800; color: #333; margin-bottom: 15px; line-height: 1.4; }
+    .poll-option { background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 12px; padding: 14px 15px; margin-bottom: 12px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: all 0.2s; font-weight: bold; color: #495057; position: relative; overflow: hidden; }
+    .poll-option:active { transform: scale(0.98); }
+    .poll-fill { position: absolute; left: 0; top: 0; height: 100%; background: rgba(142, 68, 173, 0.15); z-index: 1; border-radius: 10px; }
+    .poll-text { position: relative; z-index: 2; }
+    .poll-percent { position: relative; z-index: 2; font-size: 13px; color: #8e44ad; font-weight: 800; }
+</style>
+</head>
+<body>
+<div class="app-container">
+
+    <div id="global-loader" class="global-loader">
+        <div class="loader-spinner"></div>
+        <div class="loader-text">⏳ कृपया प्रतीक्षा करें...</div>
+    </div>
+
+    <div id="customModal" class="modal-overlay">
+        <div class="modal-box">
+            <h3 id="modal-title" style="color:var(--primary);">डिजिटल ग्राम जालेऊ</h3>
+            <p id="modal-msg">मैसेज यहाँ आएगा</p>
+            <div class="modal-btns">
+                <button id="btn-modal-cancel" class="modal-btn cancel-btn" style="display:none;">रद्द करें</button>
+                <button id="btn-modal-ok" class="modal-btn ok-btn" style="background:linear-gradient(45deg, #28a745, #38ef7d); border:none;">ठीक है</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="screen-maintenance" class="full-screen-overlay">
+        <span style="font-size:60px; margin-bottom:20px;">🛠️</span>
+        <h1 id="maint-title">ऐप मेंटेनेंस में है</h1>
+        <p id="maint-desc">गाँव की इस ऐप में अभी कुछ नए सुधार किये जा रहे हैं। कृपया कुछ समय बाद दोबारा खोलें। असुविधा के लिए खेद है!</p>
+        <button class="main-btn btn-green" onclick="window.location.reload()">चेक करें</button>
+    </div>
+
+    <div id="screen-force-update" class="full-screen-overlay">
+        <span style="font-size:60px; margin-bottom:20px;">🚀</span>
+        <h1>नया वर्ज़न आ गया है!</h1>
+        <p>इस ऐप का नया वर्ज़न आ चुका है। सुरक्षा कारणों से पुरानी ऐप बंद कर दी गई है। कृपया नीचे दिए गए लिंक से नई ऐप डाउनलोड करें।</p>
+        <button class="main-btn btn-green" id="btn-download-update" style="max-width: 250px;">नया वर्ज़न डाउनलोड करें</button>
+        <p style="font-size:12px; color:#888; margin-top:20px; font-weight:bold;">या फिर नीचे दिए गए QR कोड को स्कैन करें:</p>
+        <img id="update-qr-display" src="" style="width:150px; height:150px; border:3px solid #007bff; border-radius:12px; display:none; margin:10px auto 0;">
+    </div>
+    <div id="page-login" class="page active-page">
+        <div class="header-bg">
+            <img src="https://cdn-icons-png.flaticon.com/512/2942/2942076.png" class="logo-img" alt="Logo">
+            <h1 style="font-weight:800; letter-spacing:1px;">डिजिटल ग्राम जालेऊ</h1>
+            <p style="font-weight:bold; color:#e9ecef;">लॉगिन करें</p>
+        </div>
+        <div class="content-box">
+            <div class="input-group"><label>मोबाइल नंबर</label><input type="tel" id="log-mob" placeholder="अपना सही 10 अंकों का नंबर लिखें"></div>
+            <div class="input-group"><label>पासवर्ड</label><input type="password" id="log-pass" placeholder="पासवर्ड लिखें"></div>
+            <p style="text-align: right;"><span style="color:#007bff; font-size:12px; font-weight:bold; cursor:pointer;" onclick="goToPage('page-forgot')">पासवर्ड भूल गए?</span></p>
+            <button class="main-btn btn-green" onclick="showLoader(); submitLogin();">लॉगिन करें</button>
+            <div style="text-align:center; margin-top:20px; font-size:14px; font-weight:800; color:#0056b3; cursor:pointer;" onclick="goToPage('page-register')">नया खाता बनाएं (Registration)</div>
+        </div>
+    </div>
+
+    <div id="page-register" class="page">
+        <div class="header-bg"><button class="top-btn-left" onclick="goToPage('page-login')">‹</button><h1 style="font-weight:800;">नया खाता बनाएं</h1></div>
+        <div class="content-box">
+            <div class="input-group"><label>आपका नाम</label><input type="text" id="reg-name" placeholder="पूरा नाम लिखें"></div>
+            <div class="input-group"><label>मोबाइल नंबर (सही 10 अंक)</label><input type="tel" id="reg-mob" placeholder="जैसे: 98765xxxxx"></div>
+            <div class="input-group"><label>जन्म तिथि</label><input type="date" id="reg-dob"></div>
+            <div class="input-group">
+                <label>आपकी केटेगरी</label>
+                <select id="reg-cat" onchange="toggleRegFields()" style="border:2px solid #0056b3; font-weight:bold; color:#0056b3;">
+                    <option value="gramwasi">ग्रामवासी</option>
+                    <option value="sarpanch">सरपंच</option>
+                    <option value="panch">पंच</option>
+                    <option value="shop">दुकान</option>
+                    <option value="emitra">ई-मित्र</option>
+                    <option value="tempo">टेम्पो चालक</option>
+                    <option value="other">अन्य</option>
+                </select>
+            </div>
+            <div class="input-group" id="box-ward"><label>वार्ड / मोहल्ला</label><input type="text" id="reg-ward"></div>
+            <div class="input-group" id="box-shopname" style="display:none;"><label>दुकान / गाड़ी / सेवा का नाम</label><input type="text" id="reg-shopname"></div>
+            <div class="input-group" id="box-other-cat" style="display:none;"><label>अपनी सेवा का प्रकार लिखें</label><input type="text" id="reg-other-cat"></div>
+            <div class="input-group">
+                <label>कठोर पासवर्ड बनाएं</label>
+                <input type="password" id="reg-pass" placeholder="पहला अक्षर बड़ा, एक नंबर और एक @#*">
+            </div>
+            <button class="main-btn btn-green" onclick="showLoader(); submitRegister();">रजिस्टर करें</button>
+        </div>
+    </div>
+
+    <div id="page-forgot" class="page">
+        <div class="header-bg"><button class="top-btn-left" onclick="goToPage('page-login')">‹</button><h1 style="font-weight:800;">पासवर्ड बदलें</h1></div>
+        <div class="content-box">
+            <div id="forgot-step-1">
+                <div class="input-group"><label>मोबाइल नंबर</label><input type="tel" id="forgot-mob" placeholder="रजिस्टर्ड नंबर"></div>
+                <div class="input-group"><label>नाम</label><input type="text" id="forgot-name" placeholder="खाते में दर्ज नाम"></div>
+                <div class="input-group"><label>जन्म तिथि</label><input type="date" id="forgot-dob"></div>
+                <button class="main-btn btn-dark" onclick="showLoader(); verifyUserForPassword();">सत्यापित करें</button>
+            </div>
+            <div id="forgot-step-2" style="display: none;">
+                <p style="color: var(--primary); font-weight: bold; text-align: center;">✓ पहचान सत्यापित!</p>
+                <div class="input-group"><label>नया कठोर पासवर्ड</label><input type="password" id="forgot-new-pass" placeholder="पहला अक्षर बड़ा, एक नंबर और एक @#*"></div>
+                <button class="main-btn btn-green" onclick="showLoader(); resetUserPassword();">अपडेट करें</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="page-home" class="page">
+        <div class="home-header">
+            <button class="top-btn-left" onclick="showLoader(); refreshApp();">🔄</button>
+            <button class="top-btn-right" onclick="logout()">लॉगआउट</button>
+            <div class="welcome-title" id="user-name-display" style="font-size:15px; font-weight:bold;">लोड हो रहा है...</div>
+            <div style="font-size:18px; font-weight:900; margin-top:5px; letter-spacing:1px;">डिजिटल ग्राम जालेऊ</div>
+        </div>
+        
+        <div id="user-banners-container" class="banner-slider" style="display:none;"></div>
+        
+        <div class="home-grid" style="margin-top:10px;">
+            <div class="home-card c-notice" onclick="openDynamicList('notices', 'सूचना केंद्र')"><span class="badge" id="badge-notice"></span><span class="icon">📢</span>नोटिस बोर्ड</div>
+            <div class="home-card c-polling" onclick="openPollingPage()"><span class="icon">📊</span>गाँव की पोलिंग</div>
+            <div class="home-card c-choupal" onclick="openDynamicList('choupal', 'ई-चौपाल')"><span class="icon">🗣️</span>ई-चौपाल (पब्लिक)</div>
+            <div class="home-card c-diary" onclick="openDynamicList('diary', 'डिजिटल डायरी')"><span class="icon">📖</span>डिजिटल डायरी</div>
+            
+            <div class="home-card c-leaderboard" onclick="openLeaderboard()"><span class="icon">🏆</span>कर्मा लीडरबोर्ड</div>
+            <div class="home-card c-kyc" onclick="goToPage('page-kyc')"><span class="icon">✅</span>ब्लू टिक KYC</div>
+            
+            <div class="home-card c-emergency" onclick="openDynamicList('emergency', 'इमरजेंसी व डॉक्टर')"><span class="icon">🚨</span>इमरजेंसी व डॉक्टर</div>
+            <div class="home-card c-emitra" onclick="openDynamicList('shop', 'दुकानें व ई-मित्र')"><span class="icon">🏪</span>दुकानें व ई-मित्र</div>
+            <div class="home-card c-tempo" onclick="openDynamicList('tempo', 'टेम्पो / ट्रांसपोर्ट')"><span class="icon">🛺</span>टेम्पो सेवा</div>
+            <div class="home-card c-olx" onclick="openDynamicList('olx', 'गाँव का बाज़ार')"><span class="icon">🛒</span>गाँव का बाज़ार</div>
+            <div class="home-card c-gallery" onclick="openGallery()"><span class="icon">🖼️</span>गाँव की गैलरी</div>
+            <div class="home-card c-complaint" onclick="openMyPortal('complaint')"><span class="icon">📝</span>शिकायत दर्ज</div>
+            <div class="home-card c-dev" onclick="openMyPortal('dev')"><span class="icon">🛠️</span>डेवलपर सपोर्ट</div>
+            
+            <div id="admin-icon-tempo" class="home-card c-tempo" style="display:none; background:linear-gradient(135deg, #d35400, #e67e22);" onclick="openTempoSettings()"><span class="icon">⚙️</span>मेरी टेम्पो सेटिंग</div>
+            <div id="admin-icon-shop" class="home-card c-shop" style="display:none; background:linear-gradient(135deg, #4a235a, #8e44ad);" onclick="openShopSettings()"><span class="icon">⚙️</span>मेरी दुकान सेटिंग</div>
+            
+            <div id="admin-icon-sarpanch-notice" class="home-card c-sarpanch" style="display:none;" onclick="openSarpanchNoticePanel()"><span class="icon">📢</span>नोटिस भेजें</div>
+            <div id="admin-icon-sarpanch-complaint" class="home-card c-complaint" style="display:none;" onclick="openDynamicList('complaints_view', 'गाँव की शिकायतें')"><span class="icon">📝</span>शिकायतों का जवाब दें</div>
+        </div>
+    </div>
+    <div id="page-leaderboard" class="page">
+        <div class="header-bg" style="background: linear-gradient(135deg,#f5af19,#f12711);"><button class="top-btn-left" onclick="goToPage('page-home')">‹</button><h2 style="margin-top:20px; font-weight:800;">🏆 कर्मा लीडरबोर्ड</h2></div>
+        <div style="padding:15px;">
+            <div id="lb-notice-container" style="background:#fff3cd; border:1px solid #ffeeba; padding:12px; border-radius:10px; font-size:13px; color:#856404; text-align:center; display:none; margin-bottom:15px; font-weight:bold;"></div>
+            <div class="search-box" style="background: white; text-align:center; color:#d32f2f; font-weight:900; border-color:#d32f2f;">
+                टॉप 20 यूज़र्स (सबसे ज़्यादा पॉइंट्स)
+            </div>
+            <div id="leaderboard-list"></div>
+        </div>
+    </div>
+
+    <div id="page-kyc" class="page">
+        <div class="header-bg" style="background: linear-gradient(135deg,#3498db,#2980b9);"><button class="top-btn-left" onclick="goToPage('page-home')">‹</button><h2 style="margin-top:20px; font-weight:800;">✅ ब्लू टिक प्राप्त करें</h2></div>
+        <div class="content-box" style="margin-top:-20px; text-align:center;">
+            <div style="font-size:40px; margin-bottom:10px;">🛡️</div>
+            <p style="font-size:13px; color:#dc3545; line-height:1.6; font-weight:bold; margin-bottom:20px; background:#ffeeee; padding:12px; border-radius:12px; border:1px solid #f5c6cb; text-align:left;">
+                🔒 <b>प्राइवेसी:</b> कृपया ऐसा दस्तावेज़ डालें जिसमें आपका नाम, पिता का नाम और 'जालेऊ' का पता साफ दिख रहा हो। <br><br>
+                ✅ <b>सुरक्षा की गारंटी:</b> वेरिफिकेशन पूरा होने के बाद आपका यह दस्तावेज़ डेटाबेस से ऑटोमैटिक हमेशा के लिए डिलीट हो जाएगा!
+            </p>
+            <div class="input-group"><label>आपका मोबाइल नंबर</label><input type="tel" id="kyc-mob" readonly style="background:#e9ecef; font-weight:bold; color:#495057;"></div>
+            <div class="input-group"><label>दस्तावेज़ की फोटो चुनें</label><input type="file" id="kyc-doc" accept="image/*" style="border:2px dashed #3498db; padding:15px; background:#f4f7fb; border-radius:12px; cursor:pointer;"></div>
+            <button class="main-btn" style="background:linear-gradient(45deg, #2980b9, #3498db);" id="btn-submit-kyc" onclick="showLoader(); submitKYC();">वेरिफिकेशन रिक्वेस्ट भेजें</button>
+            <div id="kyc-status-msg" style="margin-top:15px; font-size:13px; font-weight:bold;"></div>
+        </div>
+    </div>
+
+    <div id="page-dynamic-list" class="page">
+        <div class="header-bg" id="dynamic-header-bg">
+            <button class="top-btn-left" onclick="goToPage('page-home')">‹</button>
+            <h2 id="dyn-title" style="margin-top:20px; font-weight:800;">लोड हो रहा है...</h2>
+        </div>
+        <div id="dyn-help-box" style="padding:15px; display:none;">
+            <div id="dyn-help-text" style="background:#e8f4f8; border:1px solid #b6e0ed; padding:12px; border-radius:10px; font-size:13px; color:#31708f; text-align:center; font-weight:bold; line-height:1.5;"></div>
+        </div>
+        <div class="content-box" style="margin-top:-10px;">
+            <input type="text" id="dyn-search-box" class="search-box" placeholder="🔍 नाम, नंबर या टाइटल से सर्च करें..." onkeyup="handleUserSearch()">
+            <div class="wait-text" id="dyn-wait-text">⏳ डेटा लोड हो रहा है, कृपया प्रतीक्षा करें...</div>
+            <div class="list-container" id="dyn-list" style="padding:0; min-height:10vh;"></div>
+            <button id="btn-dyn-load-more" class="load-more-btn" onclick="showLoader(); loadMoreUserData();">⬇ और डेटा देखें</button>
+        </div>
+        
+        <div id="bottom-action-buttons" class="floating-bottom-btns">
+            <button id="btn-add-olx-bottom" class="main-btn btn-gold" style="display:none; font-size:15px; box-shadow: 0 4px 10px rgba(255,215,0,0.3); margin:0;" onclick="goToPage('page-add-olx')">🛍️ क्या आप कुछ बेचना चाहते हैं? यहाँ क्लिक करें</button>
+            <button id="btn-add-choupal-bottom" class="main-btn" style="background:linear-gradient(45deg, #0072ff, #00c6ff); display:none; font-size:15px; box-shadow: 0 4px 10px rgba(0,114,255,0.3); margin:0;" onclick="goToPage('page-add-choupal')">✍️ गाँव वालों के साथ अपनी बात साझा करें</button>
+        </div>
+    </div>
+
+    <div id="page-polling" class="page">
+        <div class="header-bg" style="background: linear-gradient(135deg,#8e44ad,#3498db);"><button class="top-btn-left" onclick="goToPage('page-home')">‹</button><h2 style="margin-top:20px; font-weight:800;">गाँव की पोलिंग</h2></div>
+        <div style="padding:15px;">
+            <div style="background:#f3e5f5; border:1px solid #d5b8ff; padding:12px; border-radius:10px; font-size:13px; color:#6a1b9a; text-align:center; font-weight:bold; line-height:1.5;">
+                📢 <b>नोटिस:</b> अगर आप किसी नए विषय पर पोलिंग (Voting) करवाना चाहते हैं, तो कृपया 'डेवलपर सपोर्ट' में जानकारी भेजें।
+            </div>
+        </div>
+        <div class="list-container" id="polling-list" style="padding: 10px 15px;"></div>
+    </div>
+
+    <div id="page-tempo-settings" class="page">
+        <div class="header-bg"><button class="top-btn-left" onclick="goToPage('page-home')">‹</button><h2 style="margin-top:20px; font-weight:800;">🛺 टेम्पो सेटिंग</h2></div>
+        <div class="content-box" style="margin-top:-30px; border-top: 5px solid #ff416c; border-radius: 20px;">
+            <div class="info-box" style="background: linear-gradient(to right, #e3f2fd, #bbdefb); border-left: 5px solid #007bff; border-radius:12px; padding:15px; margin-bottom:20px;">
+                <strong style="color:#0056b3; font-size:15px;">📍 लाइव लोकेशन (ड्राइवर ऐप कैसे इस्तेमाल करें):</strong><br><br>
+                <ol style="padding-left:20px; line-height:1.7; font-size:13px; color:#333; font-weight:bold;">
+                    <li>नीचे दिए गए <b>'ऐप का QR कोड देखें'</b> बटन पर क्लिक करें।</li>
+                    <li>अपने दूसरे फोन के <b>Google Lens</b> से इसे स्कैन करके 'ड्राइवर ऐप' डाउनलोड करें।</li>
+                    <li>ऐप खोलें और <b>'लोकेशन चालू करें'</b> बटन दबाएं।</li>
+                    <li style="color:#dc3545; font-size:14px; margin-top:5px;">सबसे ज़रूरी: उसी ऐप में दिए गए <b>'लॉक स्क्रीन'</b> बटन को दबाकर ही फोन को जेब या डैशबोर्ड पर रखें।</li>
+                </ol>
+                <div style="background:#fff3cd; padding:8px 12px; border-radius:8px; margin-top:12px; font-size:12px; color:#856404; font-weight:bold; border:1px solid #ffeeba;">
+                    ⚠️ अगर आप फोन के पावर बटन से स्क्रीन बंद करेंगे, तो फोन बैकग्राउंड में लोकेशन भेजना बंद कर देगा!
+                </div>
+                <button class="main-btn btn-blue" onclick="document.getElementById('tempo-qr-section').style.display='block'" style="margin-top:15px;">📲 ड्राइवर ऐप का QR कोड देखें</button>
+                <div id="tempo-qr-section" style="display:none; text-align:center; margin-top:15px; padding:15px; background:#fff; border-radius:12px; border:1px solid #cddcf6; box-shadow:0 2px 8px rgba(0,0,0,0.05);">
+                    <img id="dynamic-tempo-qr" src="" style="border: 3px solid #007bff; border-radius: 12px; width: 150px; height: 150px;">
+                    <p style="font-size:13px; color:#0056b3; margin-top:8px; font-weight:800;">इसे स्कैन करके डाउनलोड करें</p>
+                </div>
+            </div>
+            <h3 style="color: #444; border-bottom: 2px solid #eee; padding-bottom: 8px; font-weight:800;">🚦 आज की स्थिति:</h3>
+            <div class="status-container">
+                <div class="status-option"><input type="radio" name="driverStatus" id="status-active" value="चालू (Active)"><label for="status-active" class="status-label">✅ आज चालू है</label></div>
+                <div class="status-option"><input type="radio" name="driverStatus" id="status-leave" value="छुट्टी (Leave)"><label for="status-leave" class="status-label">❌ आज छुट्टी है</label></div>
+            </div>
+            <div class="input-group"><label>गाड़ी का नाम</label><input type="text" id="set-tempo-name" placeholder="जैसे: RJ 18 TA 1234"></div>
+            <h3 style="color: #444; border-bottom: 2px solid #eee; padding-bottom: 8px; margin-top:20px; font-weight:800;">⏳ फेरी (Round) का समय:</h3>
+            <div id="all-trips-container"></div>
+            <button class="add-trip-btn" onclick="addNewTripBox()">➕ एक और फेरी (Round) जोड़ें</button>
+            <button class="save-btn" onclick="showLoader(); saveTempoSettings();">💾 सारी सेटिंग्स सेव करें</button>
+        </div>
+    </div>
+
+    <div id="page-shop-settings" class="page">
+        <div class="header-bg"><button class="top-btn-left" onclick="goToPage('page-home')">‹</button><h2 style="margin-top:20px; font-weight:800;">प्रोफाइल अपडेट करें</h2></div>
+        <div class="content-box" style="margin-top:-30px;">
+            <div class="input-group" style="background:#f8f9fa; padding:15px; border-radius:12px; border:1px solid #e9ecef; box-shadow:0 2px 5px rgba(0,0,0,0.05);">
+                <label style="font-size:15px; color:#333; font-weight:800;">क्या आज सेवा चालू है?</label>
+                <div style="display:flex; align-items:center; margin-top:8px;">
+                    <label class="switch"><input type="checkbox" id="shopToggle" onchange="updateSarthiStatus()"><span class="slider"></span></label>
+                    <span id="shop-status-text" style="margin-left:15px; font-weight:bold; color:#28a745; font-size:15px;">चालू है</span>
+                </div>
+            </div>
+            <div class="input-group"><label>दुकान / सेवा का नाम</label><input type="text" id="set-shop-name"></div>
+            <div class="input-group"><label>खुलने का समय</label><input type="time" id="shop-open-time"></div>
+            <div class="input-group"><label>बंद होने का समय</label><input type="time" id="shop-close-time"></div>
+            <hr style="margin:20px 0; border:0; border-top:2px dashed #ddd;">
+            <button class="main-btn btn-dark" onclick="toggleManageServices()" style="padding:12px; font-size:14px; margin-bottom:15px;">👀 सेव की गई सामग्री देखें</button>
+            <div id="manage-services-div" style="display:none; background:#f8f9fa; padding:15px; border-radius:12px; margin-bottom:15px; border:1px solid #dee2e6;"></div>
+            <div style="background:#e6f7ff; padding:15px; border-radius:12px; border:2px dashed #0056b3; margin-bottom:15px;">
+                <h4 style="color:#0056b3; font-size:14px; margin-bottom:12px; font-weight:800;">नया सामान / सेवा जोड़ें:</h4>
+                <div class="input-group"><label>नाम</label><input type="text" id="new-srv-name"></div>
+                <div class="input-group"><label>प्राइज़ / फीस (₹)</label><input type="number" id="new-srv-fee"></div>
+                <div class="input-group" id="box-new-docs" style="display:none;"><label>आवश्यक डॉक्यूमेंट्स</label><input type="text" id="new-srv-docs"></div>
+            </div>
+            <button class="main-btn btn-green" onclick="showLoader(); saveShopData();">पूरी जानकारी सेव करें</button>
+        </div>
+    </div>
+
+    <div id="page-sarthi-details" class="page">
+        <div class="header-bg" id="details-header-bg"><button class="top-btn-left" onclick="goToPage('page-dynamic-list')">‹ वापस</button><h2 id="details-top-title" style="margin-top:20px; font-weight:800;">विवरण</h2></div>
+        <div class="content-box" id="sarthi-details-content" style="margin-top:-30px; line-height: 1.6;"><p align='center' style='font-weight:bold; color:#007bff;'>लोड हो रहा है...</p></div>
+    </div>
+
+    <div id="page-add-olx" class="page">
+        <div class="header-bg" style="background: linear-gradient(135deg,#f7971e,#ffd200);"><button class="top-btn-left" onclick="openDynamicList('olx', 'गाँव का बाज़ार')">‹</button><h2 style="margin-top:20px; font-weight:800;">सामान बेचें</h2></div>
+        <div class="content-box" style="margin-top:-30px;">
+            <div class="input-group"><label>क्या बेचना है?</label><input type="text" id="olx-title"></div>
+            <div class="input-group"><label>कीमत (₹)</label><input type="number" id="olx-price"></div>
+            <div class="input-group"><label>विवरण</label><textarea id="olx-desc" rows="3"></textarea></div>
+            <div class="input-group"><label>फोटो</label><input type="file" id="olx-photo" style="display:block; width:100%; padding:15px; border:2px dashed #f7971e; background:#fff8e1; border-radius:12px; cursor:pointer;"></div>
+            <button class="main-btn btn-gold" id="btn-submit-olx" onclick="showLoader(); submitOlxData();">🛒 बाज़ार में डालें</button>
+        </div>
+    </div>
+    
+    <div id="page-add-choupal" class="page">
+        <div class="header-bg" style="background: linear-gradient(135deg,#00c6ff,#0072ff);"><button class="top-btn-left" onclick="openDynamicList('choupal', 'ई-चौपाल')">‹</button><h2 style="margin-top:20px; font-weight:800;">नया संदेश लिखें</h2></div>
+        <div class="content-box" style="margin-top:-30px;">
+            <div class="input-group"><textarea id="choupal-post-text" rows="5" placeholder="अपने विचार पूरे गाँव के साथ साझा करें..." style="font-size:15px; padding:15px;"></textarea></div>
+            <button class="main-btn" style="background:linear-gradient(45deg, #0072ff, #00c6ff);" onclick="showLoader(); submitChoupalPost();">🗣️ पब्लिक पोस्ट करें</button>
+        </div>
+    </div>
+
+    <div id="page-gallery" class="page">
+        <div class="header-bg" style="background: linear-gradient(135deg,#8e2de2,#4a00e0);"><button class="top-btn-left" onclick="goToPage('page-home')">‹</button><h2 style="margin-top:20px; font-weight:800;">गाँव की गैलरी</h2></div>
+        <div class="gallery-grid" id="gallery-list"></div>
+    </div>
+    <div id="gallery-modal" class="gallery-viewer">
+        <img id="gallery-fullscreen-img" src="">
+        <div class="viewer-btns">
+            <button class="viewer-btn" style="background:white; color:#000;" onclick="downloadGalleryImage()">⬇ डाउनलोड करें</button>
+            <button class="viewer-btn" style="background:linear-gradient(45deg, #dc3545, #ff4b2b); color:white;" onclick="closeGalleryModal()">✖ बैक</button>
+        </div>
+    </div>
+
+    <div id="page-complaint" class="page">
+        <div class="header-bg" style="background: linear-gradient(135deg,#cb2d3e,#ef473a);"><button class="top-btn-left" onclick="goToPage('page-home')">‹</button><h2 style="font-weight:800;">सरपंच को सीधी शिकायत</h2></div>
+        <div class="content-box">
+            <div class="input-group"><label>विषय</label><input type="text" id="comp-title"></div>
+            <div class="input-group"><label>विवरण (विस्तार से लिखें)</label><textarea id="comp-desc" rows="4"></textarea></div>
+            <div class="input-group"><label>सबूत / फोटो (यदि हो)</label><input type="file" id="comp-photo" style="display:block; width:100%; padding:15px; border:2px dashed #dc3545; background:#ffeeee; border-radius:12px; cursor:pointer;"></div>
+            <button class="main-btn btn-red" id="btn-submit-comp" onclick="showLoader(); submitComplaintData();">📝 सरपंच को शिकायत भेजें</button>
+            <hr style="margin:25px 0 15px; border:0; border-top:2px solid #eee;"><div id="my-complaints-list"></div>
+        </div>
+    </div>
+    
+    <div id="page-developer" class="page">
+        <div class="header-bg" style="background: linear-gradient(135deg,#4b6cb7,#182848);"><button class="top-btn-left" onclick="goToPage('page-home')">‹</button><h2 style="font-weight:800;">डेवलपर सपोर्ट</h2></div>
+        <div class="content-box">
+            <div class="input-group"><label>विषय (क्या समस्या आ रही है?)</label><input type="text" id="dev-title"></div>
+            <div class="input-group"><label>विवरण</label><textarea id="dev-desc" rows="4"></textarea></div>
+            <div class="input-group"><label>स्क्रीनशॉट / फोटो</label><input type="file" id="dev-photo" style="display:block; width:100%; padding:15px; border:2px dashed #343a40; background:#f8f9fa; border-radius:12px; cursor:pointer;"></div>
+            <button class="main-btn btn-dark" id="btn-submit-dev" onclick="showLoader(); submitDeveloperData();">🛠️ डेवलपर को भेजें</button>
+            <hr style="margin:25px 0 15px; border:0; border-top:2px solid #eee;"><div id="my-dev-replies-list"></div>
+        </div>
+    </div>
+
+    <div id="page-sarpanch-notice" class="page">
+        <div class="header-bg" style="background: linear-gradient(135deg,#f12711,#f5af19);"><button class="top-btn-left" onclick="goToPage('page-home')">‹</button><h2 style="margin-top:20px; font-weight:800;">नोटिस भेजें</h2></div>
+        <div class="content-box" style="margin-top:-30px;">
+            <div class="input-group"><label>नोटिस का विषय</label><input type="text" id="sarp-notice-title" placeholder="जैसे: ग्राम सभा की बैठक"></div>
+            <div class="input-group"><label>पूरी जानकारी</label><textarea id="sarp-notice-desc" rows="5" placeholder="यहाँ गाँव वालों के लिए मैसेज विस्तार से लिखें..." style="font-size:15px;"></textarea></div>
+            <button class="main-btn btn-gold" onclick="showLoader(); sarpanchSendNotice();" style="font-size:18px; padding:18px;">📢 नोटिस पब्लिक करें</button>
+        </div>
+    </div>
+
+    <div class="bottom-nav" id="bottom-nav">
+        <div class="nav-item" onclick="goToPage('page-home')"><span class="icon">🏠</span>होम</div>
+        <div class="nav-item" onclick="openDynamicList('notices', 'सूचना केंद्र')"><span class="badge" id="nav-badge-notice"></span><span class="icon">📢</span>नोटिस</div>
+        <div class="nav-item" onclick="goToPage('page-complaint')"><span class="icon">📝</span>शिकायत</div>
+    </div>
+</div>
+<script>
+    // ==========================================
+    // 1. FIREBASE SETUP (Error Free & Safe)
+    // ==========================================
+    var firebaseConfig = { 
+        apiKey: "AIzaSyBwGpUB6mRG4SJCa0efoLKIwSUrHmrpQ9w", 
+        authDomain: "digital-gram-99d8c.firebaseapp.com", 
+        projectId: "digital-gram-99d8c", 
+        storageBucket: "digital-gram-99d8c.firebasestorage.app", 
+        messagingSenderId: "289275700443", 
+        appId: "1:289275700443:web:d0c5fde9ef1e546c5e58fe",
+        databaseURL: "https://digital-gram-99d8c-default-rtdb.firebaseio.com/" 
+    };
+    
+    if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+    var db = firebase.firestore();
+    var rtdb = firebase.database(); 
+
+    // --- GLOBAL VARIABLES ---
+    var globalUserName = ''; var userCat = ''; var isUserVerified = false; 
+    var globalListCache = []; var visibleListCount = 5; var tripCount = 0;
+    var currentCategory = ''; var currentShopServices = [];
+    var liveUserListener = null; // 🔥 Single Device Login Listener
+
+    // ✅ FIXED: TEMPO STOPS
+    var tempoStops = [ 
+        { name: "जालेऊ स्टैंड", lat: 28.0587282, lng: 74.9109737 }, 
+        { name: "बालाजी मंदिर", lat: 28.0575782, lng: 74.9117723 }, 
+        { name: "जनरल स्टोर", lat: 28.0572752, lng: 74.9122092 }, 
+        { name: "चक्की", lat: 28.056183, lng: 74.912468 }, 
+        { name: "राइका ढाणी स्टैंड", lat: 28.052322, lng: 74.916187 }, 
+        { name: "आसास", lat: 28.039581, lng: 74.927714 }, 
+        { name: "दो जांटी", lat: 28.019184, lng: 74.950074 }, 
+        { name: "चूरू स्टैंड", lat: 28.006273, lng: 74.960327 }, 
+        { name: "फतेहपुर स्टैंड", lat: 27.996884, lng: 74.961847 } 
+    ];
+
+    // --- ⏳ ANTI-CRASH LOADER LOGIC ---
+    function showLoader() { document.getElementById('global-loader').style.display = 'flex'; }
+    function hideLoader() { document.getElementById('global-loader').style.display = 'none'; }
+
+    // --- FAST NAVIGATION & MODALS ---
+    function goToPage(pageId) { 
+        var pages = document.querySelectorAll('.page');
+        pages.forEach(function(p) { p.classList.remove('active-page'); });
+        var targetPage = document.getElementById(pageId);
+        if(targetPage) targetPage.classList.add('active-page'); 
+        window.scrollTo(0,0);
+        document.getElementById('bottom-nav').style.display = (['page-login','page-register','page-forgot'].includes(pageId)) ? 'none' : 'flex';
+        if(pageId === 'page-kyc') { document.getElementById('kyc-mob').value = localStorage.getItem("userMobile") || ''; }
+    }
+
+    function customAlert(msg) { 
+        hideLoader();
+        document.getElementById('modal-msg').innerText = msg; document.getElementById('btn-modal-cancel').style.display = 'none'; 
+        document.getElementById('btn-modal-ok').onclick = function() { document.getElementById('customModal').style.display = 'none'; }; 
+        document.getElementById('customModal').style.display = 'flex'; 
+    }
+
+    function customConfirm(msg, onConfirm) { 
+        hideLoader();
+        document.getElementById('modal-msg').innerText = msg; document.getElementById('btn-modal-cancel').style.display = 'block'; 
+        document.getElementById('btn-modal-cancel').onclick = function() { document.getElementById('customModal').style.display = 'none'; }; 
+        document.getElementById('btn-modal-ok').onclick = function() { document.getElementById('customModal').style.display = 'none'; if(onConfirm) onConfirm(); }; 
+        document.getElementById('customModal').style.display = 'flex'; 
+    }
+
+    function isValidMobile(mob) { return /^[0-9]{10}$/.test(mob) && !/^(.)\1{9}$/.test(mob) && !/0123456789|1234567890|0987654321|9876543210/.test(mob); }
+    function isValidPassword(pass) { return /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/.test(pass); }
+    
+    function logout() { 
+        customConfirm("क्या आप लॉगआउट करना चाहते हैं?", function() { 
+            if(liveUserListener) liveUserListener(); // लाइव ट्रैकिंग बंद करें
+            localStorage.removeItem("userMobile"); 
+            localStorage.removeItem("sessionID"); // सेशन डिलीट करें
+            goToPage('page-login'); 
+        }); 
+    }
+
+    // --- 🛡️ AUTHENTICATION & SINGLE DEVICE LOGIN ---
+    function toggleRegFields() { 
+        var cat = document.getElementById('reg-cat').value; 
+        document.getElementById('box-ward').style.display = (cat === 'gramwasi') ? 'block' : 'none';
+        document.getElementById('box-shopname').style.display = (['shop','emitra','other','tempo'].includes(cat)) ? 'block' : 'none';
+        document.getElementById('box-other-cat').style.display = (cat === 'other') ? 'block' : 'none';
+    }
+
+    function submitLogin() { 
+        var mob = document.getElementById('log-mob').value; var pass = document.getElementById('log-pass').value; 
+        if(!mob || !pass) { hideLoader(); return customAlert("⚠️ कृपया नंबर और पासवर्ड दोनों लिखें!"); }
+        db.collection("users").doc(String(mob)).get().then(function(docSnap) {
+            if (docSnap.exists && docSnap.data().password === pass) { 
+                // 🔥 Single Device Logic: Create a new unique Session ID
+                var newSessionID = Date.now().toString(36) + Math.random().toString(36).substr(2);
+                
+                db.collection("users").doc(String(mob)).update({ sessionID: newSessionID }).then(function() {
+                    localStorage.setItem("userMobile", mob); 
+                    localStorage.setItem("sessionID", newSessionID); // Save securely in phone
+                    fetchAndRouteUser(mob); 
+                });
+            } 
+            else { hideLoader(); customAlert("❌ गलत मोबाइल नंबर या पासवर्ड!"); } 
+        }).catch(function(e) { hideLoader(); customAlert("एरर: " + e.message); });
+    }
+
+    function submitRegister() { 
+        var name = document.getElementById('reg-name').value; var mob = document.getElementById('reg-mob').value; var dob = document.getElementById('reg-dob').value; var pass = document.getElementById('reg-pass').value; var cat = document.getElementById('reg-cat').value; 
+        if(!name || !mob || !dob || !pass) { hideLoader(); return customAlert("⚠️ सभी जानकारी भरना आवश्यक है!"); }
+        if(!isValidMobile(mob)) { hideLoader(); return customAlert("❌ कृपया सही 10 अंकों का मोबाइल नंबर डालें।"); }
+        if(!isValidPassword(pass)) { hideLoader(); return customAlert("❌ कमज़ोर पासवर्ड! पहला अक्षर बड़ा, एक नंबर और एक चिन्ह (@, #) होना चाहिए।"); }
+
+        var extra = { name: name, dob: dob, category: cat, isVerified: false, karmaPoints: 0 }; 
+        if(cat === 'gramwasi') extra.ward = document.getElementById('reg-ward').value; 
+        else if(['shop','emitra','tempo','other'].includes(cat)) { extra.shopName = document.getElementById('reg-shopname').value; extra.isOpen = true; if(cat === 'other') extra.customCategory = document.getElementById('reg-other-cat').value; } 
+        
+        var userRef = db.collection("users").doc(String(mob)); 
+        var finalizeReg = function() {
+            userRef.get().then(function(docSnap) {
+                if(docSnap.exists) { hideLoader(); return customAlert("⚠️ इस नंबर पर खाता पहले से है!"); }
+                userRef.set(Object.assign({ mobile: mob, password: pass }, extra)).then(function() { hideLoader(); customAlert("✅ खाता बन गया! अब आप लॉगिन करें।"); goToPage('page-login'); }).catch(function(e) { hideLoader(); customAlert("एरर: " + e.message); });
+            });
+        };
+
+        if (cat === 'sarpanch') {
+            db.collection("users").where("category", "==", "sarpanch").get().then(function(snap) {
+                if (!snap.empty) { hideLoader(); return customAlert("❌ गाँव में पहले से ही एक सरपंच का खाता मौजूद है!"); } else finalizeReg(); 
+            }).catch(function(e) { hideLoader(); customAlert("एरर: " + e.message); });
+        } else { finalizeReg(); }
+    }
+
+    var verifiedMobile = ""; 
+    function verifyUserForPassword() { 
+        var mob = document.getElementById('forgot-mob').value; var name = document.getElementById('forgot-name').value; var dob = document.getElementById('forgot-dob').value; 
+        if(!mob || !name || !dob) { hideLoader(); return customAlert("⚠️ कृपया सभी जानकारी भरें!"); }
+        db.collection("users").doc(String(mob)).get().then(function(docSnap) {
+            hideLoader();
+            if (docSnap.exists && docSnap.data().name === name && docSnap.data().dob === dob) { verifiedMobile = mob; document.getElementById('forgot-step-1').style.display = 'none'; document.getElementById('forgot-step-2').style.display = 'block'; } 
+            else { customAlert("❌ जानकारी मैच नहीं हुई!"); } 
+        }).catch(function(e) { hideLoader(); customAlert("एरर: " + e.message); });
+    }
+
+    function resetUserPassword() { 
+        var newPass = document.getElementById('forgot-new-pass').value; 
+        if(!isValidPassword(newPass)) { hideLoader(); return customAlert("❌ कमज़ोर पासवर्ड! पहला अक्षर बड़ा, एक नंबर और एक विशेष चिन्ह (@,#) ज़रूर लगाएं।"); }
+        db.collection("users").doc(String(verifiedMobile)).update({ password: newPass }).then(function() { hideLoader(); customAlert("✅ पासवर्ड सफलतापूर्वक बदल दिया गया है!"); goToPage('page-login'); }).catch(function(e) { hideLoader(); customAlert("एरर: " + e.message); });
+    }
+
+    // --- AUTO-LOGOUT FIX & LIVE SECURITY MONITOR ---
+    window.onload = function() {
+        var loggedInMobile = localStorage.getItem("userMobile"); 
+        if (loggedInMobile) { fetchAndRouteUser(loggedInMobile); } 
+        else { goToPage('page-login'); checkGlobalSettings(); }
+    };
+
+    async function checkGlobalSettings() {
+        try {
+            var configSnap = await db.collection("settings").doc("app_config").get();
+            if(configSnap.exists) {
+                var conf = configSnap.data();
+                var tempoQrImg = document.getElementById('dynamic-tempo-qr');
+                if(tempoQrImg && conf.tempoLink) { tempoQrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${conf.tempoLink}`; } 
+                
+                if(conf.forceUpdate) { 
+                    document.getElementById('screen-force-update').style.display = 'flex'; 
+                    if(conf.updateLink) { document.getElementById('btn-download-update').onclick = function() { window.open(conf.updateLink, '_blank'); }; }
+                    var appQrDisplay = document.getElementById('update-qr-display');
+                    if(conf.updateLink) { appQrDisplay.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${conf.updateLink}`; appQrDisplay.style.display = 'block'; }
+                    return false; 
+                }
+                if(conf.maintenance) { document.getElementById('screen-maintenance').style.display = 'flex'; return false; }
+            }
+            return true;
+        } catch(e) { console.error(e); return true; }
+    }
+
+    async function fetchAndRouteUser(mob) {
+        showLoader();
+        try {
+            var isAppLive = await checkGlobalSettings(); if(!isAppLive) { hideLoader(); return; }
+            
+            // 🔥 LIVE USER LISTENER (For Single Device & Ban logic)
+            if(liveUserListener) liveUserListener(); // Purana listener band karo
+            
+            liveUserListener = db.collection("users").doc(String(mob)).onSnapshot(function(docSnap) {
+                if (docSnap.exists) {
+                    var data = docSnap.data(); 
+                    
+                    // 1. Single Device Security Check
+                    var localSession = localStorage.getItem("sessionID");
+                    if (data.sessionID && data.sessionID !== localSession) {
+                        // Koi dusra phone login ho gaya!
+                        if(liveUserListener) liveUserListener();
+                        localStorage.removeItem("userMobile");
+                        localStorage.removeItem("sessionID");
+                        hideLoader();
+                        goToPage('page-login');
+                        return customAlert("⚠️ आपका खाता किसी अन्य डिवाइस (फोन) में लॉगिन किया गया है! सुरक्षा कारणों से आपको यहाँ से लॉगआउट किया जा रहा है।");
+                    }
+
+                    // 2. Ban Check
+                    if (data.banUntil && (data.banUntil === 'perm' || data.banUntil > new Date().getTime())) { 
+                        if(liveUserListener) liveUserListener();
+                        localStorage.removeItem("userMobile"); localStorage.removeItem("sessionID");
+                        hideLoader(); goToPage('page-login'); 
+                        return customAlert("🚫 आपका अकाउंट एडमिन द्वारा बैन किया गया है।"); 
+                    }
+                    
+                    // 3. User Data Setup
+                    userCat = data.category || 'gramwasi'; globalUserName = data.name; isUserVerified = data.isVerified || false;
+                    var tickHtml = isUserVerified ? '<span class="blue-tick">✅</span>' : '';
+                    document.getElementById('user-name-display').innerHTML = "राम-राम, " + data.name + tickHtml;
+                    
+                    document.getElementById('admin-icon-tempo').style.display = 'none'; document.getElementById('admin-icon-shop').style.display = 'none'; document.getElementById('admin-icon-sarpanch-notice').style.display = 'none'; document.getElementById('admin-icon-sarpanch-complaint').style.display = 'none';
+                    
+                    if(userCat === 'tempo') { document.getElementById('admin-icon-tempo').style.display = 'flex'; } 
+                    else if(['shop','emitra','other'].includes(userCat)) { document.getElementById('admin-icon-shop').style.display = 'flex'; } 
+                    else if(['sarpanch','panch'].includes(userCat)) { document.getElementById('admin-icon-sarpanch-notice').style.display = 'flex'; document.getElementById('admin-icon-sarpanch-complaint').style.display = 'flex'; }
+                    
+                    loadBanners(); goToPage('page-home'); hideLoader();
+                } else { 
+                    localStorage.removeItem("userMobile"); localStorage.removeItem("sessionID");
+                    goToPage('page-login'); hideLoader(); 
+                }
+            }, function(error) {
+                hideLoader(); customAlert("नेटवर्क समस्या।");
+            });
+
+        } catch (e) { hideLoader(); customAlert("नेटवर्क समस्या।"); }
+    }
+
+    function refreshApp() { fetchAndRouteUser(localStorage.getItem("userMobile")); }
+
+    function loadBanners() {
+        db.collection("home_banners").where("active", "==", true).get().then(function(snap) {
+            var container = document.getElementById('user-banners-container');
+            if(snap.empty) { container.style.display = 'none'; return; }
+            container.style.display = 'flex'; container.innerHTML = '';
+            // Using string buffering for DOM performance
+            let bannerHtml = '';
+            snap.forEach(function(doc) {
+                var d = doc.data();
+                bannerHtml += `<div class="banner-card" style="background-image: url('${d.image}');" onclick="if('${d.link}') window.open('${d.link}', '_blank')"><div class="banner-title">${d.title}</div></div>`;
+            });
+            container.innerHTML = bannerHtml;
+        });
+    }
+
+    // --- 🏆 LEADERBOARD & KYC ---
+    function openLeaderboard() {
+        showLoader(); goToPage('page-leaderboard');
+        var listDiv = document.getElementById('leaderboard-list'); listDiv.innerHTML = "<p align='center' style='font-weight:bold; color:#d32f2f;'>लोड हो रहा है...</p>";
+        
+        db.collection("settings").doc("leaderboard_notice").get().then(function(doc) {
+            var noticeCont = document.getElementById('lb-notice-container');
+            if(doc.exists && doc.data().message) { noticeCont.innerHTML = "📢 " + doc.data().message; noticeCont.style.display = "block"; } 
+            else { noticeCont.style.display = "none"; }
+        });
+
+        db.collection("users").orderBy("karmaPoints", "desc").limit(20).get().then(function(snap) {
+            if(snap.empty) { listDiv.innerHTML = "<p align='center'>कोई डेटा नहीं मिला।</p>"; hideLoader(); return; }
+            var index = 0; let lbHtml = ''; // Optimized DOM rendering
+            snap.forEach(function(doc) {
+                var d = doc.data(); var pts = d.karmaPoints || 0;
+                if(pts > 0) {
+                    var stars = pts >= 100 ? '⭐⭐⭐⭐⭐' : pts >= 50 ? '⭐⭐⭐⭐' : pts >= 20 ? '⭐⭐⭐' : pts >= 10 ? '⭐⭐' : '⭐';
+                    var medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '🎗️';
+                    var tickHtml = d.isVerified ? '<span class="blue-tick">✅</span>' : '';
+                    lbHtml += `<div class="leaderboard-item"><div style="display:flex; align-items:center; gap:15px;"><div class="rank-badge">${medal}</div><div><div style="font-weight:bold; color:#333; font-size:15px;">${d.name} ${tickHtml}</div><div style="font-size:12px; color:var(--primary); font-weight:bold;">${pts} पॉइंट्स</div></div></div><div style="font-size:12px; letter-spacing:1px;">${stars}</div></div>`;
+                    index++;
+                }
+            });
+            listDiv.innerHTML = index === 0 ? "<p align='center'>अभी किसी के पास पॉइंट्स नहीं हैं।</p>" : lbHtml;
+            hideLoader();
+        }).catch(function(e) { hideLoader(); customAlert("एरर: " + e.message); });
+    }
+
+    function submitKYC() {
+        var mob = localStorage.getItem("userMobile"); var fileInput = document.getElementById('kyc-doc');
+        if(!mob) { hideLoader(); return customAlert("कृपया पहले लॉगिन करें!"); }
+        if(fileInput.files.length === 0) { hideLoader(); return customAlert("⚠️ कृपया पहचान पत्र की फोटो चुनें!"); }
+        
+        document.getElementById('btn-submit-kyc').innerText = "⏳ रिक्वेस्ट भेजी जा रही है...";
+        var saveKYC = function(base64Img) {
+            db.collection("kyc_requests").add({ mobile: mob, documentBase64: base64Img, status: "Pending", timestamp: firebase.firestore.FieldValue.serverTimestamp() }).then(function() {
+                hideLoader(); customAlert("✅ आपकी वेरिफिकेशन रिक्वेस्ट सफलतापूर्वक भेज दी गई है!"); 
+                document.getElementById('btn-submit-kyc').innerText = "वेरिफिकेशन रिक्वेस्ट भेजें"; fileInput.value = ""; goToPage('page-home');
+            }).catch(function(e) { hideLoader(); customAlert("एरर: " + e.message); document.getElementById('btn-submit-kyc').innerText = "वेरिफिकेशन रिक्वेस्ट भेजें"; });
+        };
+        compressImage(fileInput.files[0], saveKYC);
+    }
+    // --- 📜 DYNAMIC LISTS (Choupal, Notices, Shops, OLX) ---
+    function openDynamicList(type, titleText) {
+        showLoader(); currentCategory = type; goToPage('page-dynamic-list'); 
+        var bg = document.getElementById('dynamic-header-bg'); var helpBox = document.getElementById('dyn-help-box');
+        var helpText = document.getElementById('dyn-help-text'); var btnOlxBottom = document.getElementById('btn-add-olx-bottom');
+        var btnChoupalBottom = document.getElementById('btn-add-choupal-bottom');
+        var floatingBtns = document.getElementById('bottom-action-buttons');
+
+        document.getElementById('dyn-search-box').value = ''; document.getElementById('btn-dyn-load-more').style.display = 'none';
+        document.getElementById('dyn-wait-text').style.display = 'block'; document.getElementById('dyn-list').innerHTML = ""; 
+        
+        btnOlxBottom.style.display = 'none'; btnChoupalBottom.style.display = 'none'; 
+        floatingBtns.style.display = 'none'; helpBox.style.display = 'block'; 
+
+        if(type === 'shop' || type === 'other') { bg.style.background = "linear-gradient(135deg,#7f00ff,#e100ff)"; helpText.innerHTML = "🏪 <b>दुकानें व ई-मित्र:</b> गाँव की सभी दुकानों और ई-मित्र का विवरण और खुलने/बंद होने का समय यहाँ देखें।"; } 
+        else if(type === 'tempo') { bg.style.background = "linear-gradient(135deg,#f2994a,#f2c94c)"; helpText.innerHTML = "🛺 <b>टेम्पो सेवा:</b> जालेऊ से फतेहपुर के बीच चलने वाले टेम्पो की लाइव लोकेशन और समय यहाँ देखें।"; } 
+        else if(type === 'diary') { bg.style.background = "linear-gradient(135deg,#8E2DE2,#4A00E0)"; helpText.innerHTML = "📖 <b>डिजिटल डायरी:</b> गाँव के सभी महत्वपूर्ण और ज़रूरी फोन नंबर यहाँ सुरक्षित हैं।"; } 
+        else if(type === 'choupal') { bg.style.background = "linear-gradient(135deg,#00c6ff,#0072ff)"; helpText.innerHTML = "🗣️ <b>ई-चौपाल:</b> यहाँ आप गाँव के विकास, समस्याओं या अन्य किसी भी विषय पर अपने विचार पूरे गाँव के साथ साझा कर सकते हैं।"; btnChoupalBottom.style.display = 'block'; floatingBtns.style.display = 'flex'; } 
+        else if(type === 'olx') { bg.style.background = "linear-gradient(135deg,#f7971e,#ffd200)"; helpText.innerHTML = "🛒 <b>गाँव का बाज़ार:</b> अपनी पुरानी गाड़ी, फोन, खेती का सामान या कोई भी वस्तु बेचने के लिए इसे इस्तेमाल करें।"; btnOlxBottom.style.display = 'block'; floatingBtns.style.display = 'flex'; } 
+        else if(type === 'emergency') { bg.style.background = "linear-gradient(135deg,#ff416c,#ff4b2b)"; helpText.innerHTML = "🚨 <b>इमरजेंसी:</b> आपात स्थिति (मेडिकल, पुलिस, आग) में तुरंत कॉल करने के लिए इन नंबरों का इस्तेमाल करें।"; }
+        else if(type === 'complaints_view') { bg.style.background = "linear-gradient(135deg,#cb2d3e,#ef473a)"; helpBox.style.display = 'none'; } 
+        else { bg.style.background = "linear-gradient(135deg, var(--primary), #1e7e34)"; helpText.innerHTML = "📢 <b>सूचना केंद्र:</b> ग्राम पंचायत और सरपंच द्वारा जारी किए गए सभी ज़रूरी नोटिस यहाँ पढ़ें।"; }
+        
+        document.getElementById('dyn-title').innerText = titleText; 
+        loadDynamicData(type);
+    }
+
+    async function loadDynamicData(type) {
+        try {
+            var snap;
+            if(type === 'notices') snap = await db.collection("notices").get();
+            else if(type === 'choupal') snap = await db.collection("choupal_posts").get();
+            else if(type === 'diary') snap = await db.collection("digital_diary").get();
+            else if(type === 'olx') snap = await db.collection("olx_posts").get();
+            else if(type === 'emergency') snap = await db.collection("emergency_contacts").get();
+            else if(type === 'complaints_view') snap = await db.collection("complaints").get(); 
+            else { var cats = (type === 'shop') ? ['shop', 'emitra'] : [type]; snap = await db.collection("users").where("category", "in", cats).get(); }
+
+            document.getElementById('dyn-wait-text').style.display = 'none';
+            if(snap.empty) { document.getElementById('dyn-list').innerHTML = "<p align='center'>अभी कोई जानकारी नहीं है।</p>"; hideLoader(); return; }
+            globalListCache = []; snap.forEach(function(docObj) { globalListCache.push({ id: docObj.id, data: docObj.data() }); });
+            globalListCache.sort(function(a,b) { 
+                if(type === 'choupal') { if(a.data.isPinned && !b.data.isPinned) return -1; if(!a.data.isPinned && b.data.isPinned) return 1; }
+                var tA = a.data.timestamp ? a.data.timestamp.toMillis() : 0; var tB = b.data.timestamp ? b.data.timestamp.toMillis() : 0; return tB - tA; 
+            });
+            visibleListCount = 5; renderDynamicList(); hideLoader();
+        } catch (e) { hideLoader(); customAlert("Error: " + e.message); }
+    }
+
+    function renderDynamicList() {
+        var listDiv = document.getElementById('dyn-list'); 
+        var query = document.getElementById('dyn-search-box').value.toLowerCase();
+        var filteredData = globalListCache.filter(function(item) { var d = item.data; var str = String(d.title||'')+" "+String(d.name||'')+" "+String(d.message||'')+" "+String(d.shopName||'')+" "+String(d.description||'')+" "+String(d.mobile||''); return str.toLowerCase().includes(query); });
+        var displayData = filteredData.slice(0, visibleListCount);
+        if(displayData.length === 0) { listDiv.innerHTML = "<p align='center'>सर्च में कुछ नहीं मिला।</p>"; hideLoader(); return; }
+        
+        // ⚡ TURBO FIX: String buffering instead of multiple DOM updates
+        let htmlBuffer = "";
+
+        displayData.forEach(function(item) {
+            var d = item.data; var id = item.id; var html = ''; var dateStr = (d.timestamp && d.timestamp.toDate) ? d.timestamp.toDate().toLocaleDateString() : '';
+
+            if(currentCategory === 'notices') {
+                var sarpDel = (userCat === 'sarpanch') ? `<button onclick="db.collection('notices').doc('${id}').delete().then(function(){openDynamicList('notices', 'सूचना केंद्र')})" style="background:red; color:white; border:none; padding:5px; border-radius:5px; float:right; cursor:pointer;">🗑️ हटाएं</button>` : '';
+                html = `<div class="list-item"><div class="list-title" onclick="document.getElementById('desc-${id}').style.display = document.getElementById('desc-${id}').style.display === 'none' ? 'block' : 'none'"><span>${d.title}</span><span style="font-size:12px; color:#0056b3;">विवरण ⬇</span></div><div style="font-size:12px; font-weight:bold; color:var(--primary); margin-top:4px;">👤 प्रेषक: ${d.authorName || 'सरपंच'}</div><div id="desc-${id}" class="list-desc">${d.description}</div><div class="list-date" style="font-size:11px; color:#999; margin-top:8px; text-align:right;">${dateStr} ${sarpDel}</div></div>`;
+            } 
+            else if(currentCategory === 'choupal') {
+                var tickHtml = d.isVerified ? '<span class="blue-tick">✅</span>' : '';
+                var pinBadge = d.isPinned ? `<span style="background:linear-gradient(45deg,#ff9100,#ff6d00); color:#000; padding:2px 6px; border-radius:4px; font-size:10px; margin-left:5px;">📌 Pinned</span>` : '';
+                var sarpDel = (userCat === 'sarpanch' || userCat === 'panch' || d.userMobile === localStorage.getItem("userMobile")) ? `<button onclick="db.collection('choupal_posts').doc('${id}').delete().then(function(){openDynamicList('choupal', 'ई-चौपाल')})" style="background:#dc3545; color:white; border:none; padding:4px 8px; border-radius:5px; font-size:10px; margin-top:8px; cursor:pointer;">🗑️ यह पोस्ट हटाएं</button>` : '';
+                html = `<div class="list-item" style="border-left-color:#00c6ff;"><div class="list-title" style="font-size:14px; color:#555;">🗣️ ${d.authorName} ${tickHtml} ${pinBadge} <span style="font-size:11px; float:right;">${dateStr}</span></div><p style="font-size:14px; color:#222; margin-top:8px; line-height:1.5;">${d.message}</p>${sarpDel}</div>`;
+            }
+            else if(currentCategory === 'olx') {
+                var imgHTML = d.photoBase64 ? `<img src="${d.photoBase64}" loading="lazy" style="width:100%; border-radius:10px; margin-top:10px; cursor:pointer;" onclick="openFullscreenImage('${d.photoBase64}')">` : ''; 
+                var deleteBtn = (d.userMobile === localStorage.getItem("userMobile") || userCat === 'sarpanch') ? `<button onclick="db.collection('olx_posts').doc('${id}').delete().then(function(){customAlert('डिलीट हो गया!'); openDynamicList('olx', 'गाँव का बाज़ार');})" style="background:red; color:white; border:none; padding:5px 10px; border-radius:5px; font-size:11px; margin-top:5px; width:100%;">🗑️ पोस्ट हटाएं</button>` : ''; 
+                html = `<div class="list-item"><div class="list-title" style="color:#f7971e;">${d.title} <span style="color:#333;">₹${d.price}</span></div><div style="font-size:13px; color:#666; margin-top:5px;">${d.description}</div>${imgHTML}<a href="tel:${d.userMobile}" class="main-btn" style="background:#f7971e; text-align:center; text-decoration:none; padding:10px; margin-top:10px; display:block; color:white;">📞 कॉल करें (${d.userName})</a>${deleteBtn}</div>`;
+            }
+            else if(currentCategory === 'diary' || currentCategory === 'emergency') {
+                var link = d.contact || d.mobile;
+                html = `<div class="list-item" style="border-left-color:${currentCategory==='diary'?'#8E2DE2':'#dc3545'};"><div class="list-title">${d.name || d.title}</div><p style="font-size:13px; color:#666; margin-top:5px;">${d.title?d.name:''}</p><a href="tel:${link}" class="main-btn" style="background:${currentCategory==='diary'?'#8E2DE2':'#dc3545'}; text-align:center; text-decoration:none; padding:10px; margin-top:10px; display:block; color:white;">📞 ${link}</a></div>`;
+            }
+            else if(currentCategory === 'complaints_view') { 
+                var imgHTML = d.photoBase64 ? `<img src="${d.photoBase64}" loading="lazy" style="width:100%; border-radius:10px; margin-top:10px; cursor:pointer;" onclick="openFullscreenImage('${d.photoBase64}')">` : ''; var replyKey = d.reply || '';
+                html = `<div class="list-item" style="border-left-color:#dc3545;"><div class="list-title">${d.title} <span style="font-size:11px; color:#666;">${dateStr}</span></div><div style="font-size:12px; color:#0056b3; margin-top:4px;">👤 प्रेषक: ${d.userName} (${d.userMobile})</div><div class="list-desc" style="display:block; border-top:none; padding:0; margin-top:10px; color:#222;">${d.description}</div>${imgHTML}<div style="background:#f8f9fa; padding:10px; border-radius:8px; margin-top:10px; border:1px solid #ddd;"><textarea id="sarp-reply-${id}" style="width:100%; padding:8px; font-size:12px; border-radius:5px; border:1px solid #ccc; outline:none;" rows="2" placeholder="अपना जवाब यहाँ लिखें...">${replyKey}</textarea><button onclick="showLoader(); sarpanchSendReply('${id}')" style="background:var(--primary); color:white; border:none; padding:8px; width:100%; border-radius:5px; margin-top:5px; cursor:pointer; font-weight:bold;">✅ जवाब भेजें</button></div></div>`;
+            }
+            else {
+                var statusHTML = "";
+                if (currentCategory === 'tempo') { statusHTML = d.todayStatus === "छुट्टी (Leave)" ? `<span style="color:red; font-size:11px;">🔴 छुट्टी है</span>` : `<span style="color:green; font-size:11px;">🟢 चालू है</span>`; } 
+                else { statusHTML = d.isOpen !== false ? `<span style="color:green; font-size:11px;">🟢 चालू है</span>` : `<span style="color:red; font-size:11px;">🔴 छुट्टी है</span>`; }
+                html = `<div class="list-item" onclick="openSarthiDetails('${id}', '${currentCategory}')"><div class="list-title">${d.shopName || d.name} ${statusHTML}</div><div style="font-size:13px; color:#666; margin-top:5px;">👤 संचालक: ${d.name}</div><div style="margin-top:10px; font-size:12px; color:var(--sarthi); font-weight:bold; text-align:right;">पूरी जानकारी ❯</div></div>`;
+            }
+            htmlBuffer += html;
+        });
+        
+        listDiv.innerHTML = htmlBuffer;
+        document.getElementById('btn-dyn-load-more').style.display = (filteredData.length > visibleListCount) ? 'block' : 'none';
+        hideLoader();
+    }
+
+    function handleUserSearch() { visibleListCount = 5; renderDynamicList(); }
+    function loadMoreUserData() { showLoader(); visibleListCount += 10; renderDynamicList(); }
+
+    // --- 📊 POLLING LOGIC (Optimized) ---
+    function openPollingPage() { goToPage('page-polling'); loadPollingData(); }
+    function loadPollingData() {
+        showLoader(); var listDiv = document.getElementById('polling-list'); 
+        db.collection("polls").orderBy("timestamp", "desc").get().then(function(snap) {
+            if(snap.empty) { listDiv.innerHTML = "<p align='center'>अभी गाँव में कोई पोलिंग नहीं चल रही है।</p>"; hideLoader(); return; }
+            let pollBuffer = "";
+            snap.forEach(function(docObj) {
+                var d = docObj.data(); var id = docObj.id; var totalVotes = d.totalVotes || 0;
+                var userMobile = localStorage.getItem("userMobile"); var userVoted = d.votedUsers && d.votedUsers.includes(userMobile);
+                var html = `<div class="poll-card"><div class="poll-title">❓ ${d.question}</div><div style="font-size:11px; color:#888; margin-bottom:10px;">कुल वोट: ${totalVotes}</div>`;
+                
+                if(d.options && Array.isArray(d.options)) {
+                    d.options.forEach(function(opt, index) {
+                        var percent = totalVotes === 0 ? 0 : Math.round((opt.votes / totalVotes) * 100);
+                        if(userVoted) { html += `<div class="poll-option" style="cursor:default; border-color:#8e44ad;"><div class="poll-fill" style="width:${percent}%;"></div><span class="poll-text">${opt.text}</span><span class="poll-percent">${percent}%</span></div>`; } 
+                        else { html += `<div class="poll-option" onclick="submitDynamicVote('${id}', ${index})"><span class="poll-text">${opt.text}</span><span>⭕</span></div>`; }
+                    });
+                } else {
+                    var percentA = totalVotes === 0 ? 0 : Math.round(((d.votesA || 0) / totalVotes) * 100); var percentB = totalVotes === 0 ? 0 : Math.round(((d.votesB || 0) / totalVotes) * 100);
+                    if(userVoted) { html += `<div class="poll-option" style="cursor:default; border-color:#8e44ad;"><div class="poll-fill" style="width:${percentA}%;"></div><span class="poll-text">${d.optionA}</span><span class="poll-percent">${percentA}%</span></div><div class="poll-option" style="cursor:default; border-color:#8e44ad;"><div class="poll-fill" style="width:${percentB}%;"></div><span class="poll-text">${d.optionB}</span><span class="poll-percent">${percentB}%</span></div>`; } 
+                    else { html += `<div class="poll-option" onclick="submitVote('${id}', 'A')"><span class="poll-text">${d.optionA}</span><span>⭕</span></div><div class="poll-option" onclick="submitVote('${id}', 'B')"><span class="poll-text">${d.optionB}</span><span>⭕</span></div>`; }
+                }
+                if(userVoted) { html += `<div style="text-align:center; font-size:12px; color:#28a745; margin-top:10px; font-weight:bold;">✅ आपने वोट दे दिया है!</div>`; }
+                html += `</div>`; pollBuffer += html;
+            });
+            listDiv.innerHTML = pollBuffer;
+            hideLoader();
+        }).catch(function(e){ hideLoader(); customAlert(e.message); });
+    }
+
+    function submitDynamicVote(pollId, optionIndex) {
+        var mob = localStorage.getItem("userMobile"); var pollRef = db.collection("polls").doc(pollId);
+        customConfirm("क्या आप वाकई इस विकल्प पर वोट देना चाहते हैं? वोट बदला नहीं जा सकता।", function() {
+            showLoader();
+            db.runTransaction(function(transaction) {
+                return transaction.get(pollRef).then(function(doc) {
+                    if (!doc.exists) throw "Poll does not exist!"; var data = doc.data(); var votedUsers = data.votedUsers || [];
+                    if (votedUsers.includes(mob)) throw "Already voted!";
+                    votedUsers.push(mob); data.options[optionIndex].votes += 1; data.totalVotes += 1;
+                    transaction.update(pollRef, { options: data.options, totalVotes: data.totalVotes, votedUsers: votedUsers });
+                });
+            }).then(function() { hideLoader(); customAlert("✅ आपका वोट सफलता पूर्वक दर्ज हो गया है!"); loadPollingData(); }).catch(function(err) { hideLoader(); if(err === "Already voted!") customAlert("⚠️ आप पहले ही वोट दे चुके हैं!"); else { customAlert("❌ वोट दर्ज करने में त्रुटि हुई!"); } });
+        });
+    }
+
+    function submitVote(pollId, option) {
+        var mob = localStorage.getItem("userMobile"); var pollRef = db.collection("polls").doc(pollId);
+        customConfirm("क्या आप वाकई इस विकल्प पर वोट देना चाहते हैं? वोट बदला नहीं जा सकता।", function() {
+            showLoader();
+            db.runTransaction(function(transaction) {
+                return transaction.get(pollRef).then(function(doc) {
+                    if (!doc.exists) throw "Poll does not exist!"; var data = doc.data(); var votedUsers = data.votedUsers || [];
+                    if (votedUsers.includes(mob)) throw "Already voted!";
+                    votedUsers.push(mob); var newVotesA = (data.votesA || 0) + (option === 'A' ? 1 : 0); var newVotesB = (data.votesB || 0) + (option === 'B' ? 1 : 0); var newTotal = newVotesA + newVotesB;
+                    transaction.update(pollRef, { votesA: newVotesA, votesB: newVotesB, totalVotes: newTotal, votedUsers: votedUsers });
+                });
+            }).then(function() { hideLoader(); customAlert("✅ आपका वोट सफलता पूर्वक दर्ज हो गया है!"); loadPollingData(); }).catch(function(err) { hideLoader(); if(err === "Already voted!") customAlert("⚠️ आप पहले ही वोट दे चुके हैं!"); else { customAlert("❌ वोट दर्ज करने में त्रुटि हुई!"); } });
+        });
+    }
+
+    // --- 🛺 TEMPO TRACKING ---
+    function getDistance(lat1, lon1, lat2, lon2) { 
+        var R = 6371; var dLat = (lat2 - lat1) * Math.PI / 180; var dLon = (lon2 - lon1) * Math.PI / 180; 
+        var a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2); 
+        return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))) * 1000; 
+    }
+    function formatTime(timeStr) { 
+        if(!timeStr) return 'सेट नहीं'; var pts = timeStr.split(':'); var h = parseInt(pts[0]); var m = pts[1]; 
+        var ampm = h >= 12 ? 'PM' : 'AM'; h = h % 12 || 12; return `${h}:${m} ${ampm}`; 
+    }
+
+    function openSarthiDetails(uid, type) {
+        showLoader(); goToPage('page-sarthi-details'); var contentDiv = document.getElementById('sarthi-details-content'); 
+        var topTitle = document.getElementById('details-top-title'); var headerBg = document.getElementById('details-header-bg');
+        if(type === 'tempo') { headerBg.style.background = "linear-gradient(135deg,#f2994a,#f2c94c)"; topTitle.innerText = "टेम्पो विवरण"; } 
+        else { headerBg.style.background = "linear-gradient(135deg,#7f00ff,#e100ff)"; topTitle.innerText = "सेवा विवरण"; }
+        
+        db.collection("users").doc(uid).get().then(function(docSnap) {
+            hideLoader();
+            if(docSnap.exists) {
+                var data = docSnap.data(); var shopName = data.shopName || data.name;
+                var html = `<h3 style="color:#333; margin-bottom:5px;">${shopName}</h3>`;
+
+                if(type !== 'tempo') {
+                    var statusText = data.isOpen !== false ? "<span style='color:green; font-weight:bold;'>🟢 चालू है (Online)</span>" : "<span style='color:red; font-weight:bold;'>🔴 छुट्टी है (Offline)</span>"; 
+                    html += `<p style="font-size:13px;">${statusText}</p><hr style="margin:15px 0; border:0; border-top:1px solid #eee;"><div style="line-height:1.8; font-size:14px;"><p><b>👤 संचालक:</b> ${data.name}</p><p><b>📞 मोबाइल:</b> <a href="tel:${data.mobile}" style="color:var(--sarthi); font-weight:bold; text-decoration:none;">${data.mobile}</a></p><p><b>🕒 खुलने का समय:</b> ${formatTime(data.openTime)}</p><p><b>🕒 बंद होने का समय:</b> ${formatTime(data.closeTime)}</p>`;
+                    if(data.services && data.services.length > 0) { 
+                        html += `<div style="background:#f0f8ff; padding:15px; border-radius:10px; margin-top:15px;"><b>📋 उपलब्ध सामग्री/सेवाएँ:</b><ul style="padding-left:20px; line-height:1.6; margin-top:10px; color:#444;">`; 
+                        data.services.forEach(function(srv) { var docStr = srv.docs ? `<br><span style="color:#666; font-size:11px;"><i>डॉक्यूमेंट्स: ${srv.docs}</i></span>` : ''; html += `<li style="margin-bottom:8px;"><b>${srv.name}</b> <br><span style="color:#0056b3; font-size:12px; font-weight:bold;">प्राइज़ / फीस: ₹${srv.fee || '0'}</span>${docStr}</li>`; }); html += `</ul></div>`; 
+                    }
+                } else if(type === 'tempo') {
+                    var tStatus = data.todayStatus === "छुट्टी (Leave)" ? "<span style='color:red; font-weight:bold;'>🔴 आज छुट्टी है</span>" : "<span style='color:green; font-weight:bold;'>🟢 आज चालू है</span>";
+                    html += `<p style="font-size:13px;">${tStatus}</p><hr style="margin:15px 0; border:0; border-top:1px solid #eee;"><div style="line-height:1.8; font-size:14px;"><p><b>👤 संचालक:</b> ${data.name}</p><p><b>📞 मोबाइल:</b> <a href="tel:${data.mobile}" style="color:var(--sarthi); font-weight:bold; text-decoration:none;">${data.mobile}</a></p><div style="background:#f0f8ff; padding:15px; border-radius:10px; margin-top:15px;"><b>⏳ आज की फेरी (Rounds):</b><ul style="padding-left:20px; line-height:1.6; margin-top:10px; color:#444;">`;
+                    if(data.trips && Object.keys(data.trips).length > 0) {
+                        var tripCountLoaded = Object.keys(data.trips).length / 2;
+                        for(let i=1; i<=tripCountLoaded; i++) { if(data.trips['r'+i+'Go'] || data.trips['r'+i+'Back']) { html += `<li style="margin-bottom:8px;"><b>फेरी ${i}:</b><br><span style="color:#0056b3; font-size:12px;">जालेऊ से: ${formatTime(data.trips['r'+i+'Go'])} | फतेहपुर से: ${formatTime(data.trips['r'+i+'Back'])}</span></li>`; } }
+                    } else { html += `<li style="margin-bottom:8px; color:#666; font-size:12px;">अभी कोई समय सेट नहीं है।</li>`; }
+                    html += `</ul></div><button onclick="refreshTempoLocation('${uid}')" id="btn-tempo-ref" style="background:#28a745; color:white; border:none; padding:10px; border-radius:8px; margin-top:15px; font-weight:bold; cursor:pointer; width:100%; box-shadow: 0px 4px 6px rgba(40,167,69,0.3);">🔄 लाइव लोकेशन रिफ्रेश करें</button><div id="tempo-loc-data">${renderTempoLocationHTML(data)}</div>`;
+                }
+                html += `</div>`; contentDiv.innerHTML = html;
+            } else { contentDiv.innerHTML = "<p align='center'>खाता नहीं मिला!</p>"; }
+        }).catch(function(){ hideLoader(); });
+    }
+
+    function renderTempoLocationHTML(data) {
+        var html = '';
+        if(data.todayStatus !== "छुट्टी (Leave)" && data.lat && data.lng) {
+            var closestIndex = 0; var minDistance = Infinity; 
+            tempoStops.forEach(function(stop, index) { 
+                var dist = getDistance(data.lat, data.lng, stop.lat, stop.lng); 
+                if(dist < minDistance) { minDistance = dist; closestIndex = index; } 
+            });
+
+            var totalStops = tempoStops.length - 1; var progressPercent = (closestIndex / totalStops) * 100;
+            var directionText = "📍 लाइव ट्रैकिंग"; var flipClass = "";
+            if (data.bearing) {
+                if (data.bearing > 90 && data.bearing < 270) { directionText = "⬇ फतेहपुर की ओर जा रहा है"; } 
+                else { directionText = "⬆ जालेऊ की ओर जा रहा है"; flipClass = "flip-icon"; }
+            }
+
+            var trackHeight = totalStops * 40; 
+            html += `<div style="background:#fff; border:1px solid #e9ecef; padding:25px 15px; border-radius:15px; margin-top:15px; box-shadow:0 4px 15px rgba(0,0,0,0.05);">
+                        <h4 style="margin-bottom:10px; color:#333; text-align:center;">📍 लाइव रूट ट्रैकिंग</h4>
+                        <div style="text-align:center; font-size:13px; font-weight:bold; color:#0056b3; margin-bottom:15px;">${directionText}</div>
+                        <div class="v-track-container" style="height: ${trackHeight}px;">
+                            <div class="v-track-line"></div><div class="v-track-progress" style="height: ${progressPercent}%;"></div><div class="v-tempo-icon ${flipClass}" style="top: ${progressPercent}%;">🛺</div>`;
+            tempoStops.forEach(function(stop, index) {
+                var posPercent = (index / totalStops) * 100; var dotColor = index <= closestIndex ? "#28a745" : "#fff"; var borderColor = index <= closestIndex ? "#28a745" : "#ddd"; var fw = index === closestIndex ? "bold" : "normal"; var tc = index === closestIndex ? "#28a745" : "#555";
+                html += `<div style="position: absolute; top: ${posPercent}%; left: 16px; width: 14px; height: 14px; background: ${dotColor}; border: 3px solid ${borderColor}; border-radius: 50%; z-index: 3; margin-top:-7px;"></div><div style="position: absolute; top: ${posPercent}%; left: 45px; transform: translateY(-50%); font-size: 13px; font-weight: ${fw}; color: ${tc}; width: 150px;">${stop.name}</div>`;
+            });
+            html += `</div><div style="text-align:center; font-size:12px; color:#ff9966; margin-top:20px; font-weight:bold;">लोकेशन: ${tempoStops[closestIndex].name} के पास (लगभग ${Math.round(minDistance)} मीटर दूर)</div></div>`;
+        } else { html += `<div style="background:#fff3cd; border:1px solid #ffeeba; padding:12px; border-radius:12px; margin-top:20px; font-size:13px; color:#856404; text-align:center;"><i>📍 लाइव लोकेशन अभी उपलब्ध नहीं है (या गाड़ी खड़ी है)।</i></div>`; }
+        return html;
+    }
+
+    function refreshTempoLocation(uid) {
+        var btn = document.getElementById('btn-tempo-ref'); var div = document.getElementById('tempo-loc-data');
+        btn.innerText = "⏳ रिफ्रेश हो रहा है..."; btn.style.background = "#6c757d";
+        db.collection("users").doc(uid).get().then(function(fsSnap) {
+            if(fsSnap.exists) { 
+                var fsData = fsSnap.data();
+                rtdb.ref("users/" + uid).once("value").then(function(rtSnap) {
+                    var rtData = rtSnap.val() || {}; fsData.lat = rtData.lat || null; fsData.lng = rtData.lng || null; fsData.bearing = rtData.bearing || null;
+                    div.innerHTML = renderTempoLocationHTML(fsData); btn.innerText = "✅ लोकेशन अपडेट हो गई"; btn.style.background = "#28a745"; 
+                    setTimeout(function() { btn.innerText = "🔄 लाइव लोकेशन रिफ्रेश करें"; btn.style.background = "#28a745"; }, 2000); 
+                }).catch(function(error) { btn.innerText = "❌ लोकेशन नहीं मिली"; btn.style.background = "#dc3545"; });
+            }
+        });
+    }
+
+    // --- FORMS & SETTINGS ---
+    function addNewTripBox() {
+        tripCount++; const cont = document.getElementById('all-trips-container'); const tripDiv = document.createElement('div'); tripDiv.className = 'trip-row'; tripDiv.id = 'trip-' + tripCount;
+        let html = `<h4 style="margin: 0 0 12px 0; color: #0072ff; border-bottom: 2px dashed #bbdefb; padding-bottom: 5px; display: inline-block;">🛺 फेरी (Round) ${tripCount}</h4>`;
+        if (tripCount > 1) { html += `<button class="remove-btn" onclick="removeTripBox(${tripCount})" style="position: absolute; top: 12px; right: 12px; background: #ff4d4d; color: white; border: none; border-radius: 5px; padding: 6px 12px; cursor: pointer; font-size: 12px; font-weight: bold;">❌ हटाएँ</button>`; }
+        html += `<div class="input-group" style="display: flex; justify-content: space-between;"><div style="width: 48%;"><label style="font-size: 13px; color: #555; font-weight: 600;">जालेऊ से:</label><input type="time" id="r${tripCount}Go" style="width: 100%; padding: 10px; margin-top: 5px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 15px; outline: none;"></div><div style="width: 48%;"><label style="font-size: 13px; color: #555; font-weight: 600;">फतेहपुर से:</label><input type="time" id="r${tripCount}Back" style="width: 100%; padding: 10px; margin-top: 5px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 15px; outline: none;"></div></div>`;
+        tripDiv.innerHTML = html; cont.appendChild(tripDiv);
+    }
+    function removeTripBox(id) { const el = document.getElementById('trip-' + id); if(el) el.remove(); }
+    
+    function updateSarthiStatus() { 
+        var isOpen = document.getElementById('shopToggle').checked; 
+        var txtEl = document.getElementById('shop-status-text'); 
+        if(txtEl) { if(isOpen) { txtEl.innerText = "चालू है"; txtEl.style.color = "#28a745"; } else { txtEl.innerText = "छुट्टी है (बंद)"; txtEl.style.color = "#dc3545"; } } 
+        db.collection("users").doc(localStorage.getItem("userMobile")).update({ isOpen: isOpen }); 
+    }
+
+    function openShopSettings() { 
+        showLoader(); goToPage('page-shop-settings'); 
+        db.collection("users").doc(localStorage.getItem("userMobile")).get().then(function(docSnap) {
+            hideLoader(); document.getElementById('box-new-docs').style.display = (userCat === 'emitra') ? 'block' : 'none'; 
+            if(docSnap.exists) { 
+                var d = docSnap.data();
+                document.getElementById('shopToggle').checked = d.isOpen !== false; 
+                document.getElementById('shop-status-text').innerText = d.isOpen !== false ? "चालू है" : "छुट्टी है (बंद)"; document.getElementById('shop-status-text').style.color = d.isOpen !== false ? "#28a745" : "#dc3545"; 
+                document.getElementById('set-shop-name').value = d.shopName || ''; document.getElementById('shop-open-time').value = d.openTime || ''; document.getElementById('shop-close-time').value = d.closeTime || ''; 
+                currentShopServices = d.services || []; renderManageServices(); 
+            } 
+        });
+    }
+
+    function toggleManageServices() { var div = document.getElementById('manage-services-div'); div.style.display = div.style.display === 'none' ? 'block' : 'none'; }
+    function renderManageServices() { 
+        var div = document.getElementById('manage-services-div'); 
+        if(currentShopServices.length === 0) { div.innerHTML = "<p style='font-size:12px; color:#666; text-align:center;'>कोई सामग्री नहीं है।</p>"; return; } 
+        let serviceHtml = '';
+        currentShopServices.forEach(function(srv, i) { serviceHtml += `<div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #ddd; padding:8px 0; font-size:13px;"><span><b>${srv.name}</b> (₹${srv.fee})</span> <button onclick="removeService(${i})" style="background:red; color:white; border:none; border-radius:4px; padding:4px 8px; cursor:pointer;">🗑️ हटाएं</button></div>`; }); 
+        div.innerHTML = serviceHtml;
+    }
+    function removeService(i) { currentShopServices.splice(i, 1); renderManageServices(); }
+    
+    function saveShopData() { 
+        var sName = document.getElementById('set-shop-name').value; var oTime = document.getElementById('shop-open-time').value; var cTime = document.getElementById('shop-close-time').value; var newName = document.getElementById('new-srv-name').value; var newFee = document.getElementById('new-srv-fee').value; var newDocs = document.getElementById('new-srv-docs') ? document.getElementById('new-srv-docs').value : ''; 
+        if(newName) { currentShopServices.push({ name: newName, fee: newFee, docs: newDocs }); } 
+        showLoader();
+        db.collection("users").doc(localStorage.getItem("userMobile")).update({ shopName: sName, openTime: oTime, closeTime: cTime, services: currentShopServices }).then(function() {
+            hideLoader(); customAlert("✅ जानकारी सेव हो गई!"); document.getElementById('new-srv-name').value = ""; document.getElementById('new-srv-fee').value = ""; if(document.getElementById('new-srv-docs')) document.getElementById('new-srv-docs').value = ""; goToPage('page-home'); 
+        }).catch(function(e) { hideLoader(); customAlert("एरर: " + e.message); });
+    }
+
+    function openTempoSettings() { 
+        showLoader(); goToPage('page-tempo-settings'); document.getElementById('all-trips-container').innerHTML = ''; tripCount = 0;
+        db.collection("users").doc(localStorage.getItem("userMobile")).get().then(function(docSnap) {
+            hideLoader();
+            if(docSnap.exists) { 
+                var data = docSnap.data();
+                if(data.todayStatus === "छुट्टी (Leave)") { document.getElementById('status-leave').checked = true; } else { document.getElementById('status-active').checked = true; }
+                document.getElementById('set-tempo-name').value = data.shopName || ''; 
+                if (data.trips && Object.keys(data.trips).length > 0) {
+                    var numTrips = Object.keys(data.trips).length / 2;
+                    for(let i=1; i<=numTrips; i++) { if(data.trips['r'+i+'Go'] || data.trips['r'+i+'Back']) { addNewTripBox(); document.getElementById('r'+i+'Go').value = data.trips['r'+i+'Go'] || ''; document.getElementById('r'+i+'Back').value = data.trips['r'+i+'Back'] || ''; } }
+                } else { addNewTripBox(); }
+            } else { addNewTripBox(); }
+        });
+    }
+
+    function saveTempoSettings() { 
+        var tName = document.getElementById('set-tempo-name').value; 
+        let statusRadios = document.getElementsByName('driverStatus'); let selectedStatus = "चालू (Active)";
+        for (let radio of statusRadios) { if (radio.checked) { selectedStatus = radio.value; break; } }
+        let tripsData = {};
+        for (let i = 1; i <= tripCount; i++) {
+            let goInput = document.getElementById('r' + i + 'Go'); let backInput = document.getElementById('r' + i + 'Back');
+            if (goInput && backInput) { if(goInput.value) tripsData['r' + i + 'Go'] = goInput.value; if(backInput.value) tripsData['r' + i + 'Back'] = backInput.value; }
+        }
+        showLoader();
+        db.collection("users").doc(localStorage.getItem("userMobile")).update({ shopName: tName, trips: tripsData, todayStatus: selectedStatus }).then(function() {
+            hideLoader(); customAlert("✅ आपकी सेटिंग्स और समय सेव हो गया!"); goToPage('page-home'); 
+        }).catch(function(e) { hideLoader(); customAlert("❌ एरर: " + e.message); });
+    }
+
+    function compressImage(file, callback) { 
+        var reader = new FileReader(); reader.readAsDataURL(file); 
+        reader.onload = function(event) { 
+            var img = new Image(); img.src = event.target.result; 
+            img.onload = function() { 
+                var canvas = document.createElement('canvas'); var width = img.width; var height = img.height; 
+                if(width > 800) { height *= 800/width; width = 800; } 
+                canvas.width = width; canvas.height = height; var ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height); 
+                var quality = 0.8; var dataUrl = canvas.toDataURL('image/jpeg', quality); 
+                while(Math.round((dataUrl.length * 0.75) / 1024) > 200 && quality > 0.1) { quality -= 0.1; dataUrl = canvas.toDataURL('image/jpeg', quality); } 
+                callback(dataUrl); 
+            } 
+        } 
+    }
+
+    // --- UPLOADS & COMPRESSION ---
+    function submitChoupalPost() { 
+        var msg = document.getElementById('choupal-post-text').value; if(!msg) { hideLoader(); return customAlert("⚠️ कृपया संदेश लिखें!"); }
+        showLoader();
+        db.collection("choupal_posts").add({ message: msg, authorName: globalUserName, userMobile: localStorage.getItem("userMobile"), isVerified: isUserVerified, timestamp: firebase.firestore.FieldValue.serverTimestamp() }).then(function() {
+            hideLoader(); customAlert("✅ पोस्ट हो गया!"); document.getElementById('choupal-post-text').value = ''; openDynamicList('choupal', 'ई-चौपाल (पब्लिक)'); 
+        }).catch(function(e) { hideLoader(); customAlert("एरर: " + e.message); });
+    }
+
+    function submitOlxData() { 
+        var t = document.getElementById('olx-title').value; var p = document.getElementById('olx-price').value; var d = document.getElementById('olx-desc').value; var f = document.getElementById('olx-photo'); 
+        if(!t || !p) { hideLoader(); return customAlert("⚠️ टाइटल और कीमत भरें!"); }
+        showLoader();
+        var saveOlx = function(img) { db.collection("olx_posts").add({ title: t, price: p, description: d, photoBase64: img, userMobile: localStorage.getItem("userMobile"), userName: globalUserName, timestamp: firebase.firestore.FieldValue.serverTimestamp() }).then(function() { hideLoader(); customAlert("✅ बाज़ार में जुड़ गया!"); document.getElementById('olx-title').value=""; document.getElementById('olx-price').value=""; document.getElementById('olx-desc').value=""; f.value=""; openDynamicList('olx', 'गाँव का बाज़ार'); }).catch(function(e) { hideLoader(); customAlert("एरर: " + e.message); }); }; 
+        if(f.files.length > 0) compressImage(f.files[0], saveOlx); else saveOlx(null); 
+    }
+
+    function submitComplaintData() { 
+        var title = document.getElementById('comp-title').value; var desc = document.getElementById('comp-desc').value; var fileInput = document.getElementById('comp-photo'); 
+        if(!title || !desc) { hideLoader(); return customAlert("⚠️ विषय और विवरण भरें!"); }
+        showLoader();
+        var saveComplaint = function(base64Img) { db.collection("complaints").add({ userMobile: localStorage.getItem("userMobile"), userName: globalUserName, title: title, description: desc, photoBase64: base64Img, timestamp: firebase.firestore.FieldValue.serverTimestamp(), status: "Pending" }).then(function() { hideLoader(); customAlert("✅ शिकायत दर्ज हो गई है!"); document.getElementById('comp-title').value = ""; document.getElementById('comp-desc').value = ""; fileInput.value = ""; openMyPortal('complaint'); }).catch(function(e){ hideLoader(); customAlert("एरर: " + e.message); }); }; 
+        if(fileInput.files.length > 0) compressImage(fileInput.files[0], saveComplaint); else saveComplaint(null); 
+    }
+
+    function submitDeveloperData() { 
+        var title = document.getElementById('dev-title').value; var desc = document.getElementById('dev-desc').value; var fileInput = document.getElementById('dev-photo'); 
+        if(!title || !desc) { hideLoader(); return customAlert("⚠️ विषय और विवरण भरें!"); }
+        showLoader();
+        var saveReport = function(base64Img) { db.collection("app_issues").add({ userMobile: localStorage.getItem("userMobile"), userName: globalUserName, title: title, description: desc, photoBase64: base64Img, timestamp: firebase.firestore.FieldValue.serverTimestamp() }).then(function() { hideLoader(); customAlert("✅ रिपोर्ट भेज दी गई!"); document.getElementById('dev-title').value = ""; document.getElementById('dev-desc').value = ""; fileInput.value = ""; openMyPortal('dev'); }).catch(function(e){ hideLoader(); customAlert("एरर: " + e.message); }); }; 
+        if(fileInput.files.length > 0) compressImage(fileInput.files[0], saveReport); else saveReport(null); 
+    }
+
+    // --- GALLERY & SARPANCH & MY PORTAL ---
+    function openMyPortal(type) { 
+        showLoader(); var targetPage = type === 'complaint' ? 'page-complaint' : 'page-developer'; goToPage(targetPage); var listDiv = document.getElementById(type === 'complaint' ? 'my-complaints-list' : 'my-dev-replies-list'); if(!listDiv) return; 
+        db.collection(type === 'complaint' ? 'complaints' : 'app_issues').where("userMobile", "==", localStorage.getItem("userMobile")).get().then(function(snap) { 
+            if(snap.empty) { listDiv.innerHTML = "<p align='center' style='font-size:12px;'>कोई रिपोर्ट दर्ज नहीं की है।</p>"; hideLoader(); return; } 
+            let portalHtml = ""; 
+            snap.forEach(function(docObj) { var data = docObj.data(); var replyKey = type === 'complaint' ? data.reply : data.dev_reply; var fromTxt = type === 'complaint' ? 'सरपंच' : 'डेवलपर'; var replyHTML = replyKey ? `<div class="reply-box"><b>${fromTxt} का जवाब:</b> ${replyKey}</div>` : `<div class="reply-box" style="border-left-color:#ff9900;"><b>स्थिति:</b> पेंडिंग।</div>`; portalHtml += `<div class="list-item" style="padding:10px; margin:5px 0;"><div class="list-title" style="font-size:14px;">${data.title}</div><div class="list-desc" style="display:block; border-top:none; padding:0;">${data.description}</div>${replyHTML}</div>`; }); 
+            listDiv.innerHTML = portalHtml; hideLoader();
+        }); 
+    }
+
+    function openGallery() { 
+        showLoader(); goToPage('page-gallery'); var listDiv = document.getElementById('gallery-list'); 
+        db.collection("gallery").get().then(function(snap) {
+            if(snap.empty) { listDiv.innerHTML = "<p align='center' style='grid-column:1/3;'>अभी कोई फोटो नहीं है।</p>"; hideLoader(); return; } 
+            let galleryHtml = ""; 
+            snap.forEach(function(docObj) { var data = docObj.data(); if(data.photoBase64) { galleryHtml += `<div><img src="${data.photoBase64}" loading="lazy" class="gallery-img" onclick="openFullscreenImage('${data.photoBase64}')"><div style="font-size:11px; text-align:center; color:#555; margin-top:3px;">${data.title}</div></div>`; } }); 
+            listDiv.innerHTML = galleryHtml; hideLoader();
+        });
+    }
+    
+    function openFullscreenImage(base64Str) { document.getElementById('gallery-fullscreen-img').src = base64Str; document.getElementById('gallery-modal').style.display = 'flex'; }
+    function closeGalleryModal() { document.getElementById('gallery-modal').style.display = 'none'; }
+    function downloadGalleryImage() { var src = document.getElementById('gallery-fullscreen-img').src; var a = document.createElement('a'); a.href = src; a.download = 'Jaleu_Gallery.jpg'; document.body.appendChild(a); a.click(); document.body.removeChild(a); }
+
+    function openSarpanchNoticePanel() { goToPage('page-sarpanch-notice'); }
+    function sarpanchSendNotice() {
+        var title = document.getElementById('sarp-notice-title').value; var desc = document.getElementById('sarp-notice-desc').value;
+        if(!title || !desc) { hideLoader(); return customAlert("⚠️ विषय और जानकारी दोनों ज़रूरी हैं!"); }
+        showLoader();
+        db.collection("notices").add({ title: title, description: desc, authorName: globalUserName, authorMobile: localStorage.getItem("userMobile"), timestamp: firebase.firestore.FieldValue.serverTimestamp() }).then(function() { 
+            hideLoader(); customAlert("✅ नोटिस पूरे गाँव को भेज दिया गया है!"); document.getElementById('sarp-notice-title').value = ''; document.getElementById('sarp-notice-desc').value = ''; goToPage('page-home'); 
+        }).catch(function(e) { hideLoader(); customAlert("एरर: " + e.message); });
+    }
+    function sarpanchSendReply(docId) {
+        var replyText = document.getElementById(`sarp-reply-${docId}`).value; if(!replyText) { hideLoader(); return customAlert("⚠️ कृपया जवाब लिखें!"); }
+        showLoader();
+        db.collection("complaints").doc(docId).update({ reply: replyText, status: "Resolved" }).then(function() { hideLoader(); customAlert("✅ आपका जवाब भेज दिया गया है!"); }).catch(function(e) { hideLoader(); customAlert("एरर: " + e.message); });
+    }
+</script>
+</body>
+</html>
