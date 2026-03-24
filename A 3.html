@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html lang="hi" translate="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google" content="notranslate">
+    <title>अल्ट्रा प्रो-मैक्स मास्टर पैनल 18.1 (Turbo)</title>
+
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
+    <style>
+        /* ==========================================
+           ⚡ TURBO PERFORMANCE CSS (60 FPS OPTIMIZED)
+           ========================================== */
+        :root { 
+            --admin-bg: #0b0f19; 
+            /* Blur effect removed for high FPS, replaced with solid sleek color */
+            --admin-card: rgba(21, 27, 43, 0.95);
+            --admin-accent: #00e5ff; 
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; -webkit-tap-highlight-color: transparent; }
+        
+        body { margin: 0; background: var(--admin-bg); color: #e0e0e0; display: flex; justify-content: center; min-height: 100vh; }
+
+        .app-container { width: 100%; max-width: 500px; min-height: 100vh; position: relative; background: transparent; overflow-x: hidden; }
+        
+        /* ⏳ ANTI-CRASH GLOBAL LOADER */
+        .global-loader { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(11, 15, 25, 0.95); z-index: 99999999; display: none; flex-direction: column; align-items: center; justify-content: center; transform: translateZ(0); }
+        .loader-spinner { border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid var(--admin-accent); border-radius: 50%; width: 50px; height: 50px; animation: spin 0.8s linear infinite; margin-bottom: 15px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .loader-text { font-size: 16px; font-weight: bold; color: var(--admin-accent); letter-spacing: 1px; }
+
+        /* Hardware Acceleration for fast page transitions */
+        .page { display: none; width: 100%; min-height: 100vh; padding: 20px; padding-bottom: 80px; position: absolute; top: 0; left: 0; will-change: transform, opacity; transform: translateZ(0); }
+        .active-page { display: block; animation: slideIn 0.3s ease-out forwards; }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 10px 0 20px; border-bottom: 1px solid rgba(255,255,255,0.05); margin-bottom: 20px; position: sticky; top: 0; background: var(--admin-bg); z-index: 10; }
+        
+        /* Instant Button Click - Removed 300ms tap delay */
+        button, .app-card, .data-card, .back-btn, .main-btn, .small-btn { touch-action: manipulation; }
+        
+        .back-btn { background: linear-gradient(45deg, #444, #222); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .back-btn:active { transform: scale(0.95); }
+
+        /* Optimized Cards (No Backdrop-filter for 60FPS) */
+        .content-box, .data-card, .analytics-box { background: var(--admin-card); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); padding: 20px; margin-bottom: 20px; transform: translateZ(0); }
+        
+        .input-group { margin-bottom: 16px; }
+        .input-group label { display: block; font-size: 13px; margin-bottom: 8px; color: #aaa; font-weight: bold; }
+        .input-group input, .input-group textarea, .input-group select { width: 100%; padding: 14px; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; background: rgba(0,0,0,0.4); color: white; outline: none; font-size: 14px; }
+        .input-group input:focus, .input-group textarea:focus, .input-group select:focus { border-color: var(--admin-accent); }
+        
+        .main-btn { width: 100%; padding: 16px; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; color: #fff; background: linear-gradient(45deg, #00e5ff, #007bff); box-shadow: 0 4px 15px rgba(0, 229, 255, 0.4); margin-top: 10px; }
+        .main-btn:active { transform: scale(0.95); }
+        .btn-green { background: linear-gradient(45deg, #00e676, #00b0ff); box-shadow: 0 4px 15px rgba(0, 230, 118, 0.4); }
+        .btn-purple { background: linear-gradient(45deg, #d500f9, #ff3366); box-shadow: 0 4px 15px rgba(213, 0, 249, 0.4); }
+        .btn-gold { background: linear-gradient(45deg, #ffd700, #ff9100); color: #000; box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4); }
+
+        .menu-header { font-size: 14px; color: var(--admin-accent); margin: 30px 0 15px; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; }
+        .app-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 25px; }
+        .app-card { background: linear-gradient(145deg, rgba(26,34,53,1), rgba(17,23,38,1)); border-radius: 16px; padding: 15px; text-align: left; cursor: pointer; border: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; justify-content: flex-start; transform: translateZ(0); }
+        .app-card:active { transform: translateY(2px) scale(0.98); border-color: var(--admin-accent); }
+        .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        
+        .app-icon { font-size: 20px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 12px; color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); }
+        .app-card h3 { font-size: 14px; color: #fff; margin: 0; }
+        .app-card p { font-size: 10px; color: #aaa; line-height: 1.4; margin: 0; }
+        
+        .ic-blue { background: linear-gradient(135deg, #007bff, #00d2ff); } 
+        .ic-green { background: linear-gradient(135deg, #00e676, #1de9b6); } 
+        .ic-red { background: linear-gradient(135deg, #ff3366, #ff80ab); } 
+        .ic-purple { background: linear-gradient(135deg, #d500f9, #ea80fc); } 
+        .ic-gold { background: linear-gradient(135deg, #ff9100, #ffd700); } 
+        .ic-orange { background: linear-gradient(135deg, #ff6d00, #ffab40); } 
+        .ic-cyan { background: linear-gradient(135deg, #00b8d4, #84ffff); color: #000; }
+
+        .data-list { display: flex; flex-direction: column; gap: 15px; }
+        .data-card { border-left: 4px solid var(--admin-accent); }
+        .data-card .title { font-size: 16px; font-weight: bold; color: #fff; margin-bottom: 8px; display:flex; justify-content:space-between; align-items:center; }
+        .data-card .info { font-size: 13px; color: #aaa; margin-bottom: 8px; line-height: 1.5; }
+        .data-card img { width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px; margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.1); }
+        
+        .action-btns { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+        .small-btn { padding: 12px; border: none; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; flex: 1; color: white; display: flex; align-items: center; justify-content: center; gap: 5px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        .small-btn:active { transform: scale(0.95); }
+        
+        .del-btn { background: linear-gradient(45deg, #ff1744, #ff5252); } 
+        .ban-btn { background: linear-gradient(45deg, #ff6d00, #ff9100); }
+        .ok-action-btn { background: linear-gradient(45deg, #00c853, #00e676); color: #000; }
+        .reply-btn { background: linear-gradient(45deg, #2979ff, #00e5ff); }
+        
+        .load-more-btn { background: linear-gradient(45deg, #d500f9, #00e5ff); color: white; border: none; border-radius: 30px; padding: 14px 25px; font-size: 14px; font-weight: bold; box-shadow: 0 4px 15px rgba(0, 229, 255, 0.4); cursor: pointer; margin: 20px auto; display: none; text-align: center; width:80%; }
+        .load-more-btn:active { transform: scale(0.95); }
+
+        .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(255,255,255,0.1); border-radius: 34px; transition: 0.2s; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px; background-color: #888; border-radius: 50%; transition: 0.2s; }
+        input:checked + .slider { background: linear-gradient(45deg, #00e676, #00b0ff); border: none; }
+        input:checked + .slider:before { transform: translateX(24px); background-color: #fff; }
+
+        .progress-bar-bg { width: 100%; height: 10px; background: rgba(255,255,255,0.1); border-radius: 5px; overflow: hidden; margin-top: 5px; }
+        .progress-bar-fill { height: 100%; border-radius: 5px; transition: width 0.5s ease-out; } /* Faster transition */
+
+        /* 👤 USER SIDE-SLIDE PANEL (Optimized) */
+        .side-slide { position: fixed; top: 0; right: -100%; width: 85%; max-width: 380px; height: 100vh; background: var(--admin-card); z-index: 999999; box-shadow: -5px 0 25px rgba(0,0,0,0.8); transition: right 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); overflow-y: auto; padding: 20px; border-left: 1px solid rgba(255,255,255,0.1); transform: translateZ(0); }
+        .side-slide.open { right: 0; }
+        .slide-close { background: rgba(255,51,102,0.2); color: #ff3366; border: 1px solid rgba(255,51,102,0.5); border-radius: 50%; width: 35px; height: 35px; font-weight: bold; cursor: pointer; display:flex; align-items:center; justify-content:center; touch-action: manipulation; }
+        .slide-close:active { transform: scale(0.9); }
+        .author-highlight { color: #ffd700; font-weight: 900; cursor: pointer; text-decoration: underline; padding: 2px 5px; background: rgba(255, 215, 0, 0.1); border-radius: 4px; touch-action: manipulation; }
+
+        /* Optimized Modals */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.9); z-index: 999999; display: none; align-items: center; justify-content: center; transform: translateZ(0); }
+        .modal-box { background: var(--admin-card); width: 85%; max-width: 350px; border-radius: 20px; padding: 25px; text-align: center; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
+    </style>
+</head>
+<body>
+
+    <div id="global-loader" class="global-loader">
+        <div class="loader-spinner"></div>
+        <div class="loader-text">⏳ कृपया प्रतीक्षा करें...</div>
+    </div>
+
+    <div id="side-slide" class="side-slide">
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:15px; margin-bottom:15px;">
+            <h3 style="color:var(--admin-accent); margin:0;">👤 यूज़र प्रोफाइल</h3>
+            <button class="slide-close" onclick="closeUserSlide()">✖</button>
+        </div>
+        <div id="slide-user-content" style="font-size:14px; color:#ddd; line-height:1.8;">
+            </div>
+    </div>
+
+<div class="app-container">
+    <div id="page-login" class="page active-page">
+        <div class="header-box" style="margin-top: 60px; text-align: center;">
+            <div style="font-size:60px; margin-bottom:10px;">🛡️</div>
+            <h1 style="color: white;">अल्ट्रा प्रो-मैक्स</h1>
+            <p style="color: #aaa;">मास्टर पैनल v18.1 (Turbo UI)</p>
+        </div>
+        <div class="content-box" style="margin-top: 30px;">
+            <div class="input-group">
+                <label>मास्टर आईडी</label>
+                <input type="text" id="admin-id" placeholder="admin">
+            </div>
+            <div class="input-group">
+                <label>पासवर्ड</label>
+                <input type="password" id="admin-pass" placeholder="12345">
+            </div>
+            <button class="main-btn" id="btn-login" style="margin-top: 25px;">सिस्टम अनलॉक करें ❯</button>
+        </div>
+    </div>
+
+    <div id="page-dashboard" class="page">
+        <div class="top-bar">
+            <div>
+                <h2 style="color:var(--admin-accent); font-size:20px;">डेवलपर डैशबोर्ड</h2>
+                <div style="font-size:11px; color:#888;">वर्ज़न 18.1 (Turbo & 60FPS Optimized)</div>
+            </div>
+            <div style="display:flex; gap:10px;">
+                <button class="back-btn" style="background:linear-gradient(45deg,#00e676,#00b0ff); color:#fff; border:none;" onclick="showLoader(); refreshAdminData()">🔄</button>
+                <button class="back-btn" onclick="logoutAdmin()">लॉगआउट</button>
+            </div>
+        </div>
+
+        <div class="analytics-box">
+            <div style="display:flex; justify-content:space-between; font-size:14px; font-weight:bold; color:var(--admin-accent); margin-bottom:15px;">
+                <span>📊 सर्वर एनालिटिक्स</span><span style="color:#ff3366; animation: blink 1.5s infinite;">● Live</span>
+            </div>
+            
+            <div style="display:flex; justify-content:space-between; text-align:center; margin-bottom:15px;">
+                <div><div style="font-size:22px; color:#fff; font-weight:bold;" id="stat-users">0</div><div style="font-size:11px; color:#888;">कुल यूज़र्स</div></div>
+                <div><div style="font-size:22px; color:#fff; font-weight:bold;" id="stat-hits">0</div><div style="font-size:11px; color:#888;">कुल हिट्स</div></div>
+                <div><div style="font-size:22px; color:var(--admin-accent); font-weight:bold;" id="stat-active">0</div><div style="font-size:11px; color:#888;">ऑनलाइन</div></div>
+            </div>
+            
+            <div style="margin-bottom: 15px; border-top:1px solid rgba(255,255,255,0.05); padding-top:15px;">
+                <div style="display:flex; justify-content:space-between; font-size:11px; font-weight:bold; margin-bottom:5px;">
+                    <span style="color:#aaa;">🗄️ डेटाबेस स्टोरेज (Database Space)</span><span id="storage-text" style="color:#ffd700;">Loading...</span>
+                </div>
+                <div class="progress-bar-bg"><div id="storage-bar" class="progress-bar-fill" style="width: 0%; background: linear-gradient(45deg, #ffd700, #ff9100);"></div></div>
+            </div>
+
+            <div style="margin-bottom: 15px; border-top:1px solid rgba(255,255,255,0.05); padding-top:15px;">
+                <div style="display:flex; justify-content:space-between; font-size:11px; font-weight:bold; margin-bottom:5px;">
+                    <span style="color:#aaa;">🚀 ऐप सर्वर लोड</span><span id="load-text" style="color:#00e676;">Normal</span>
+                </div>
+                <div class="progress-bar-bg"><div id="load-bar" class="progress-bar-fill" style="width: 25%; background: linear-gradient(45deg, #00e676, #00c853);"></div></div>
+            </div>
+            <div class="chart-container" style="height: 100px;"><canvas id="trafficChart"></canvas></div>
+        </div>
+
+        <div class="menu-header">🚀 प्रो-मैक्स टूल्स</div>
+        <div class="app-grid">
+            <div class="app-card" onclick="showLoader(); goToPage('page-polls')">
+                <div class="card-header"><div class="app-icon ic-purple">📊</div><h3>लाइव वोटिंग</h3></div>
+                <p>पोल जोड़ें और रिजल्ट्स देखें।</p>
+            </div>
+            <div class="app-card" onclick="showLoader(); openAdminPage('blue_tick')">
+                <div class="card-header"><div class="app-icon ic-blue">✅</div><h3>ब्लू टिक KYC</h3></div>
+                <p>डॉक्यूमेंट चेक व वेरीफाई करें।</p>
+            </div>
+            <div class="app-card" onclick="showLoader(); goToPage('page-schedule-notify')">
+                <div class="card-header"><div class="app-icon ic-cyan">⏰</div><h3>शेड्यूल्ड मैसेज</h3></div>
+                <p>समय सेट करके मैसेज भेजें।</p>
+            </div>
+            <div class="app-card" onclick="showLoader(); openAdminPage('spam')">
+                <div class="card-header"><div class="app-icon ic-red">🤖</div><h3>AI मॉडरेटर</h3></div>
+                <p>स्पैम लिस्ट व ब्लॉक यूज़र्स।</p>
+            </div>
+            <div class="app-card" onclick="showLoader(); openAdminPage('leaderboard')">
+                <div class="card-header"><div class="app-icon ic-gold">⭐</div><h3>लीडरबोर्ड</h3></div>
+                <p>मैन्युअल पॉइंट्स व नोटिस दें।</p>
+            </div>
+            <div class="app-card" onclick="showLoader(); goToPage('page-banners')">
+                <div class="card-header"><div class="app-icon ic-orange">🖼️</div><h3>ऐड बैनर</h3></div>
+                <p>होम स्क्रीन पर विज्ञापन लगाएं।</p>
+            </div>
+        </div>
+
+        <div class="menu-header">🛠️ डेटा मैनेजमेंट</div>
+        <div class="app-grid">
+            <div class="app-card" onclick="showLoader(); openAdminPage('users')">
+                <div class="card-header"><div class="app-icon ic-blue">👥</div><h3>यूज़र्स लिस्ट</h3></div>
+                <p>डिटेल्स देखें और बैन करें।</p>
+            </div>
+            <div class="app-card" onclick="showLoader(); openAdminPage('choupal')">
+                <div class="card-header"><div class="app-icon ic-orange">🗣️</div><h3>ई-चौपाल</h3></div>
+                <p>डेवलपर मैसेज पिन करें।</p>
+            </div>
+            <div class="app-card" onclick="showLoader(); openAdminPage('complaints')">
+                <div class="card-header"><div class="app-icon ic-red">📝</div><h3>शिकायतें</h3></div>
+                <p>फ़ोटो के साथ पढ़ें व रिप्लाई दें।</p>
+            </div>
+            <div class="app-card" onclick="showLoader(); goToPage('page-backup-restore')">
+                <div class="card-header"><div class="app-icon ic-green">💾</div><h3>डेटा बैकअप</h3></div>
+                <p>JSON, PDF डाउनलोड व रिस्टोर।</p>
+            </div>
+            <div class="app-card" onclick="showLoader(); openAdminPage('olx')">
+                <div class="card-header"><div class="app-icon ic-gold">🛒</div><h3>OLX मार्केट</h3></div>
+                <p>यूज़र प्रोफाइल व पोस्ट देखें।</p>
+            </div>
+            <div class="app-card" onclick="showLoader(); goToPage('page-add-data')">
+                <div class="card-header"><div class="app-icon ic-cyan">➕</div><h3>स्मार्ट अपलोड</h3></div>
+                <p>नोटिस, डायरी या गैलरी फोटो।</p>
+            </div>
+        </div>
+
+        <div class="menu-header">⚙️ सिस्टम कंट्रोल्स</div>
+        <div class="content-box">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:15px;">
+                <div><h3 style="color:#00e5ff; font-size:15px;">🎨 पैनल बैकग्राउंड</h3><p style="font-size:11px; color:#888; margin-top:3px;">अपने एडमिन पैनल का रंग बदलें</p></div>
+                <input type="color" id="admin-bg-picker" value="#0b0f19" style="width:50px; height:40px; border:none; border-radius:8px; cursor:pointer; background:transparent; padding:0;" onchange="changeAdminBg()">
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:15px;">
+                <div><h3 style="color:#ff3366; font-size:15px;">🛠️ मेंटेनेंस मोड</h3><p style="font-size:11px; color:#888;">गाँव वालों के लिए ऐप बंद करें</p></div>
+                <label class="switch"><input type="checkbox" id="maintToggle"><span class="slider"></span></label>
+            </div>
+
+            <div style="margin-bottom:15px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:15px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <div><h3 style="color:#ffe57f; font-size:15px;">🚀 फ़ोर्स अपडेट (नया वर्ज़न)</h3><p style="font-size:11px; color:#888;">पुराने वर्ज़न को ब्लॉक करें</p></div>
+                    <label class="switch"><input type="checkbox" id="updateToggle"><span class="slider"></span></label>
+                </div>
+                <div style="background:rgba(0,0,0,0.4); padding:10px; border-radius:10px; margin-bottom:15px;">
+                    <input type="text" id="app-update-link" placeholder="नई ऐप का लिंक डालें..." style="width:100%; padding:12px; border-radius:8px; border:1px solid rgba(255,215,0,0.3); background:transparent; color:white; font-size:12px; outline:none;">
+                </div>
+
+                <div><h3 style="color:#84ffff; font-size:15px; margin-bottom:5px;">🛺 टेम्पो पैनल लिंक</h3></div>
+                <div style="background:rgba(0,0,0,0.4); padding:10px; border-radius:10px;">
+                    <input type="text" id="tempo-link" placeholder="टेम्पो ड्राइवर ऐप का लिंक..." style="width:100%; padding:12px; border-radius:8px; border:1px solid rgba(0,229,255,0.3); background:transparent; color:white; font-size:12px; outline:none;">
+                </div>
+            </div>
+            
+            <button class="main-btn" style="background:linear-gradient(45deg, #00e5ff, #007bff);" onclick="showLoader(); saveAllSettings()">💾 सभी सेटिंग्स सेव करें</button>
+        </div>
+    </div>
+    <div id="page-polls" class="page">
+        <div class="top-bar">
+            <button class="back-btn" onclick="goToPage('page-dashboard')">‹ वापस</button>
+            <h2 style="color:var(--admin-purple); font-size:18px;">📊 नया पोल (Voting)</h2>
+        </div>
+        <div class="content-box">
+            <div class="input-group">
+                <label>वोटिंग का सवाल</label>
+                <input type="text" id="poll-question" placeholder="जैसे: क्या गाँव में नई लाइब्रेरी बननी चाहिए?">
+            </div>
+            
+            <label style="color:#aaa; font-size:13px; font-weight:bold; margin-bottom:10px; display:block;">वोटिंग के विकल्प (Options)</label>
+            <div id="poll-options-container">
+                <div class="input-group" style="margin-bottom:12px;"><input type="text" class="poll-option-input" value="हाँ"></div>
+                <div class="input-group" style="margin-bottom:12px;"><input type="text" class="poll-option-input" value="नहीं"></div>
+            </div>
+            
+            <button class="main-btn btn-purple" style="margin-bottom:20px;" onclick="addPollOption()">➕ एक और विकल्प जोड़ें</button>
+            <button class="main-btn" style="background:linear-gradient(45deg, #00e5ff, #007bff);" onclick="showLoader(); publishPoll()">📊 पोल लाइव करें</button>
+        </div>
+        
+        <div class="menu-header">एक्टिव पोल्स (Live Details)</div>
+        <div id="active-polls-container" class="data-list"><p align="center" style="color:#888;">लोड हो रहा है...</p></div>
+    </div>
+
+    <div id="page-banners" class="page">
+        <div class="top-bar">
+            <button class="back-btn" onclick="goToPage('page-dashboard')">‹ वापस</button>
+            <h2 style="color:var(--admin-gold); font-size:18px;">🖼️ होम पेज बैनर (Ads)</h2>
+        </div>
+        <div class="content-box">
+            <div class="input-group"><label>बैनर का टाइटल / दुकान का नाम</label><input type="text" id="banner-title" placeholder="जैसे: रामू ई-मित्र"></div>
+            <div class="input-group"><label>बैनर की फोटो (Image Fix)</label><input type="file" id="banner-photo" accept="image/*" style="color:#ccc; font-size:12px; background:transparent;"></div>
+            <div class="input-group"><label>लिंक (ऑप्शनल)</label><input type="text" id="banner-link" placeholder="क्लिक करने पर कहाँ जाए?"></div>
+            <button class="main-btn btn-gold" onclick="showLoader(); uploadBanner()">🖼️ बैनर अपलोड करें</button>
+        </div>
+    </div>
+
+    <div id="page-schedule-notify" class="page">
+        <div class="top-bar">
+            <button class="back-btn" onclick="goToPage('page-dashboard')">‹ वापस</button>
+            <h2 style="color:var(--admin-cyan); font-size:18px;">⏰ शेड्यूल्ड मैसेज</h2>
+        </div>
+        <div class="content-box">
+            <div class="input-group"><label>किसे भेजना है?</label>
+                <select id="schedule-target">
+                    <option value="all">📢 पूरे गाँव को</option>
+                    <option value="sarpanch">👑 सिर्फ सरपंच/पंच को</option>
+                    <option value="shop">🏪 दुकानदारों को</option>
+                    <option value="driver">🛺 टेम्पो/ड्राइवर को</option>
+                </select>
+            </div>
+            <div class="input-group"><label>भेजने का समय और तारीख</label><input type="datetime-local" id="schedule-time" style="color-scheme: dark;"></div>
+            <div class="input-group"><label>मैसेज का टाइटल</label><input type="text" id="schedule-title" placeholder="टाइटल..."></div>
+            <div class="input-group"><label>मुख्य संदेश</label><textarea id="schedule-msg" rows="4" placeholder="मैसेज..."></textarea></div>
+            <button class="main-btn" style="background:linear-gradient(45deg, #00e5ff, #2979ff);" onclick="showLoader(); scheduleNotification()">⏰ शेड्यूल सेट करें</button>
+        </div>
+    </div>
+
+    <div id="page-backup-restore" class="page">
+        <div class="top-bar">
+            <button class="back-btn" onclick="goToPage('page-dashboard')">‹ वापस</button>
+            <h2 style="color:var(--admin-green); font-size:18px;">💾 बैकअप & रिस्टोर</h2>
+        </div>
+        
+        <div class="content-box" style="text-align:center;">
+            <div style="font-size:40px; margin-bottom:10px;">🗄️</div>
+            <h3 style="color:var(--admin-green); margin-bottom:5px;">JSON फुल बैकअप</h3>
+            <p style="font-size:11px; color:#aaa; margin-bottom:15px;">पूरी ऐप का डेटा (Kodular सपोर्टेड) डाउनलोड करें।</p>
+            <button class="main-btn btn-green" id="btn-json-backup" onclick="showLoader(); downloadFullBackup()">📥 JSON डाउनलोड करें</button>
+        </div>
+
+        <div class="content-box" style="text-align:center;">
+            <div style="font-size:40px; margin-bottom:10px;">📄</div>
+            <h3 style="color:#ff3366; margin-bottom:5px;">यूज़र्स लिस्ट PDF</h3>
+            <p style="font-size:11px; color:#aaa; margin-bottom:15px;">सिर्फ यूज़र्स का डेटा PDF में निकालें।</p>
+            <button class="main-btn btn-purple" onclick="showLoader(); downloadUsersPDF()">📥 PDF डाउनलोड करें</button>
+        </div>
+
+        <div class="content-box" style="text-align:center;">
+            <div style="font-size:40px; margin-bottom:10px;">🔄</div>
+            <h3 style="color:#ffd700; margin-bottom:5px;">पुराना डेटा रिस्टोर करें</h3>
+            <p style="font-size:11px; color:#aaa; margin-bottom:15px;">अपनी JSON फाइल अपलोड करके डेटा वापस लाएं।</p>
+            <input type="file" id="restore-file" accept=".json" style="width:100%; padding:10px; background:rgba(0,0,0,0.3); border-radius:8px; border:1px dashed #ffd700; margin-bottom:15px; color:#ccc;">
+            <button class="main-btn btn-gold" onclick="showLoader(); uploadOldDataRestore()">📤 डेटा रिस्टोर करें</button>
+        </div>
+    </div>
+
+    <div id="page-data-view" class="page">
+        <div class="top-bar">
+            <button class="back-btn" onclick="goToPage('page-dashboard')">‹ वापस</button>
+            <h2 id="view-title" style="color:var(--admin-green); font-size:18px;">लोड हो रहा है...</h2>
+            <button class="back-btn" onclick="showLoader(); refreshAdminData()" style="border:none; background:transparent; font-size:20px; box-shadow:none;">🔄</button>
+        </div>
+        
+        <div id="search-box-container">
+            <input type="text" id="search-box" style="width:100%; padding:14px; border-radius:12px; background:rgba(0,0,0,0.4); color:white; border:1px solid rgba(255,255,255,0.1); margin-bottom:15px; outline:none; font-size:14px;" placeholder="🔍 नंबर, नाम या टाइटल से सर्च करें..." onkeyup="handleSearch()">
+        </div>
+        
+        <div id="dynamic-header-tools" class="content-box" style="display:none; padding:15px; margin-bottom:20px; background:linear-gradient(145deg, rgba(26,34,53,1), rgba(17,23,38,1));"></div>
+        
+        <div class="data-list" id="data-list-container"></div>
+        <button id="btn-load-more" class="load-more-btn" onclick="loadMoreData()">⬇ और डेटा देखें (See More)</button>
+    </div>
+
+    <div id="page-add-data" class="page">
+        <div class="top-bar">
+            <button class="back-btn" onclick="goToPage('page-dashboard')">‹ वापस</button>
+            <h2 style="color:var(--admin-green); font-size:18px;">➕ स्मार्ट डेटा अपलोडर</h2>
+        </div>
+        <div class="content-box">
+            <div class="input-group">
+                <label>क्या अपलोड करना है?</label>
+                <select id="upload-category" onchange="toggleUploadFields()">
+                    <option value="notice">📢 गाँव का नोटिस</option>
+                    <option value="diary">📖 डिजिटल डायरी</option>
+                    <option value="emergency">🚨 इमरजेंसी नंबर</option>
+                    <option value="gallery">🖼️ गैलरी फोटो</option>
+                </select>
+            </div>
+            <div id="upload-fields">
+                <div class="input-group" id="up-f1-box"><label id="up-f1-lbl">विषय / टाइटल</label><input type="text" id="up-f1"></div>
+                <div class="input-group" id="up-f2-box"><label id="up-f2-lbl">पूरी जानकारी / विवरण</label><textarea id="up-f2" rows="4"></textarea></div>
+                <div class="input-group" id="up-photo-box" style="display:none;">
+                    <label>फोटो चुनें</label><input type="file" id="up-photo" accept="image/*" style="margin-bottom:10px; color:#ccc; font-size:12px; background:transparent;">
+                    <label>फोटो कम्प्रेस साइज (Smart Upload)</label>
+                    <select id="up-compress-size">
+                        <option value="100">100 KB (फास्ट लोडिंग)</option>
+                        <option value="200" selected>200 KB (नार्मल)</option>
+                        <option value="500">500 KB (हाई क्वालिटी)</option>
+                    </select>
+                </div>
+            </div>
+            <button class="main-btn btn-green" id="btn-submit-upload" onclick="showLoader()">डेटा अपलोड करें</button>
+        </div>
+    </div>
+
+    <div id="customModal" class="modal-overlay">
+        <div class="modal-box">
+            <h3 id="modal-title" style="color:var(--admin-accent);">सिस्टम अलर्ट</h3>
+            <p id="modal-msg" style="margin-top: 10px; margin-bottom: 15px;">मैसेज यहाँ आएगा</p>
+            
+            <div id="modal-input-container" style="display:none; margin-bottom:15px;">
+                <input type="text" id="modal-input" placeholder="यहाँ टाइप करें..." style="width:100%; padding:14px; border-radius:10px; border:1px solid rgba(255,255,255,0.1); background:rgba(0,0,0,0.3); color:white; outline:none;">
+            </div>
+            
+            <div class="action-btns">
+                <button id="btn-modal-cancel" class="small-btn del-btn" style="display:none; padding:12px;">रद्द करें</button>
+                <button id="btn-modal-ok" class="small-btn ok-action-btn" style="padding:12px;">ठीक है</button>
+            </div>
+        </div>
+    </div>
+
+</div> 
+<script>
+    // ==========================================
+    // 1. FIREBASE SETUP & CONFIGURATION
+    // ==========================================
+    const firebaseConfig = { 
+        apiKey: "AIzaSyBwGpUB6mRG4SJCa0efoLKIwSUrHmrpQ9w", 
+        authDomain: "digital-gram-99d8c.firebaseapp.com", 
+        projectId: "digital-gram-99d8c", 
+        storageBucket: "digital-gram-99d8c.firebasestorage.app", 
+        messagingSenderId: "289275700443", 
+        appId: "1:289275700443:web:d0c5fde9ef1e546c5e58fe" 
+    };
+    
+    if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+    const db = firebase.firestore();
+
+    // ==========================================
+    // 2. ULTRA-FAST LOADERS & MODALS 
+    // ==========================================
+    window.showLoader = function() { document.getElementById('global-loader').style.display = 'flex'; };
+    window.hideLoader = function() { document.getElementById('global-loader').style.display = 'none'; };
+
+    window.customAlert = function(msg) {
+        window.hideLoader();
+        document.getElementById('modal-msg').innerText = msg; 
+        document.getElementById('modal-input-container').style.display = 'none'; 
+        document.getElementById('btn-modal-cancel').style.display = 'none';
+        document.getElementById('btn-modal-ok').onclick = function() { document.getElementById('customModal').style.display = 'none'; };
+        document.getElementById('customModal').style.display = 'flex';
+    };
+
+    window.customConfirm = function(msg, onConfirm) {
+        window.hideLoader();
+        document.getElementById('modal-msg').innerText = msg; 
+        document.getElementById('modal-input-container').style.display = 'none'; 
+        let cancelBtn = document.getElementById('btn-modal-cancel'); 
+        let okBtn = document.getElementById('btn-modal-ok');
+        cancelBtn.style.display = 'block'; 
+        cancelBtn.onclick = function() { document.getElementById('customModal').style.display = 'none'; };
+        okBtn.onclick = function() { document.getElementById('customModal').style.display = 'none'; if(onConfirm) onConfirm(); };
+        document.getElementById('customModal').style.display = 'flex';
+    };
+
+    window.customPrompt = function(msg, placeholder, onConfirm) {
+        window.hideLoader();
+        document.getElementById('modal-msg').innerText = msg; 
+        document.getElementById('modal-input-container').style.display = 'block'; 
+        let inputEl = document.getElementById('modal-input'); 
+        inputEl.value = ''; inputEl.placeholder = placeholder;
+        let cancelBtn = document.getElementById('btn-modal-cancel'); 
+        let okBtn = document.getElementById('btn-modal-ok');
+        cancelBtn.style.display = 'block'; 
+        cancelBtn.onclick = function() { document.getElementById('customModal').style.display = 'none'; };
+        okBtn.onclick = function() { document.getElementById('customModal').style.display = 'none'; if(onConfirm) onConfirm(inputEl.value); };
+        document.getElementById('customModal').style.display = 'flex';
+    };
+
+    window.goToPage = function(pageId) { 
+        window.hideLoader();
+        let pages = document.querySelectorAll('.page');
+        for(let i=0; i<pages.length; i++) { pages[i].classList.remove('active-page'); }
+        document.getElementById(pageId).classList.add('active-page'); 
+        window.scrollTo(0,0); 
+        
+        if(pageId === 'page-polls') { window.showLoader(); window.loadActivePolls(); }
+    };
+
+    // ==========================================
+    // 3. ADMIN BACKGROUND CHANGER
+    // ==========================================
+    window.changeAdminBg = function() {
+        let color = document.getElementById('admin-bg-picker').value;
+        document.body.style.background = color;
+        localStorage.setItem('adminBgColor', color);
+    };
+    
+    let savedBg = localStorage.getItem('adminBgColor');
+    if(savedBg) {
+        document.body.style.background = savedBg;
+        let picker = document.getElementById('admin-bg-picker');
+        if(picker) picker.value = savedBg;
+    }
+
+    // ==========================================
+    // 4. AUTH & DASHBOARD METERS (Locker 100% Removed)
+    // ==========================================
+    if(localStorage.getItem("adminAuth") === "true") { 
+        window.goToPage('page-dashboard'); 
+        setTimeout(() => { window.loadDashboardStats(); }, 200); // Faster initial load
+    }
+
+    document.getElementById('btn-login').addEventListener('click', function() {
+        window.showLoader();
+        const id = document.getElementById('admin-id').value; 
+        const pass = document.getElementById('admin-pass').value;
+        if(id === "8005886299" && pass === "Admin@123") { 
+            localStorage.setItem("adminAuth", "true"); 
+            window.customAlert("✅ सिस्टम अनलॉक हो गया!"); 
+            window.goToPage('page-dashboard'); 
+            window.loadDashboardStats(); 
+        } else { 
+            window.customAlert("❌ गलत ID या पासवर्ड!"); 
+        }
+    });
+    
+    window.logoutAdmin = function() { 
+        window.customConfirm("क्या आप लॉगआउट करना चाहते हैं?", function() { 
+            localStorage.removeItem("adminAuth"); 
+            window.goToPage('page-login'); 
+        }); 
+    };
+
+    let trafficChartInstance = null;
+    
+    window.loadDashboardStats = async function() {
+        try {
+            // 1. Users count
+            const usersSnap = await db.collection("users").get();
+            let statUsersEl = document.getElementById('stat-users'); 
+            if(statUsersEl) statUsersEl.innerText = usersSnap.size;
+            
+            // 2. Random/Dummy Live Hits
+            let todayHits = Math.floor(Math.random() * 300) + 500;
+            let activeUsers = Math.floor(Math.random() * 15) + 2;
+            let statHitsEl = document.getElementById('stat-hits'); 
+            let statActiveEl = document.getElementById('stat-active');
+            if(statHitsEl) statHitsEl.innerText = todayHits; 
+            if(statActiveEl) statActiveEl.innerText = activeUsers;
+
+            // 3. STORAGE METER CALCULATION (Strictly without Locker)
+            const gallerySnap = await db.collection("gallery").get();
+            const olxSnap = await db.collection("olx_posts").get();
+            const kycSnap = await db.collection("kyc_requests").get();
+            
+            let totalImages = gallerySnap.size + olxSnap.size + kycSnap.size;
+            let approxStorageKB = totalImages * 200; // Average 200 KB per image
+            let maxStorageKB = 1024 * 1024; // 1 GB free quota in KB
+            
+            let storagePercent = (approxStorageKB / maxStorageKB) * 100;
+            let storageMB = (approxStorageKB / 1024).toFixed(1);
+            
+            let storageBar = document.getElementById('storage-bar');
+            let storageText = document.getElementById('storage-text');
+            
+            if(storageBar && storageText) {
+                storagePercent = storagePercent < 1 && totalImages > 0 ? 1 : storagePercent; 
+                storageBar.style.width = storagePercent.toFixed(1) + '%';
+                
+                if(storagePercent > 80) {
+                    storageText.innerText = `${storageMB} MB (खतरे में!)`;
+                    storageText.style.color = "#ff3366";
+                    storageBar.style.background = "linear-gradient(45deg, #ff1744, #ff5252)";
+                } else {
+                    storageText.innerText = `${storageMB} MB / 1024 MB`;
+                    storageText.style.color = "#ffd700";
+                    storageBar.style.background = "linear-gradient(45deg, #ffd700, #ff9100)";
+                }
+            }
+
+            // 4. App Load Meter Logic
+            let loadPercent = Math.floor(Math.random() * 30) + 20; 
+            let loadBar = document.getElementById('load-bar');
+            let loadText = document.getElementById('load-text');
+            if(loadBar && loadText) {
+                loadBar.style.width = loadPercent + '%';
+                if(loadPercent < 40) { 
+                    loadText.innerText = loadPercent + '% (Normal)'; 
+                    loadText.style.color = "#00e676"; 
+                    loadBar.style.background = "linear-gradient(45deg, #00e676, #00c853)"; 
+                } else { 
+                    loadText.innerText = loadPercent + '% (Busy)'; 
+                    loadText.style.color = "#ff9100"; 
+                    loadBar.style.background = "linear-gradient(45deg, #ff9100, #ff6d00)"; 
+                }
+            }
+
+            // 5. Traffic Chart (Optimized rendering - NO LAG)
+            const ctx = document.getElementById('trafficChart');
+            if(ctx) {
+                if(trafficChartInstance) trafficChartInstance.destroy();
+                trafficChartInstance = new Chart(ctx, {
+                    type: 'line',
+                    data: { 
+                        labels: ['सोम', 'मंगल', 'बुध', 'गुरु', 'शुक्र', 'शनि', 'रवि'], 
+                        datasets: [{ label: 'हिट्स', data: [120, 190, 250, 320, 280, 450, todayHits], borderColor: '#00e5ff', backgroundColor: 'rgba(0, 229, 255, 0.1)', borderWidth: 2, fill: true, tension: 0.4 }] 
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, animation: false, plugins:{ legend:{display:false} }, scales: { x: { ticks: { color: '#888' }, grid:{color:'rgba(255,255,255,0.05)'} }, y: { ticks: { color: '#888' }, grid:{color:'rgba(255,255,255,0.05)'} } } }
+                });
+            }
+
+            // 6. Settings Load 
+            const setSnap = await db.collection("settings").doc("app_config").get();
+            if(setSnap.exists) { 
+                let d = setSnap.data();
+                let maintToggle = document.getElementById('maintToggle'); 
+                let updateToggle = document.getElementById('updateToggle');
+                if(maintToggle) maintToggle.checked = d.maintenance || false; 
+                if(updateToggle) updateToggle.checked = d.forceUpdate || false; 
+                let appLink = document.getElementById('app-update-link'); 
+                let tempoLink = document.getElementById('tempo-link');
+                if(appLink && d.updateLink) appLink.value = d.updateLink;
+                if(tempoLink && d.tempoLink) tempoLink.value = d.tempoLink;
+            }
+            window.hideLoader();
+        } catch(e) { console.error("Stats Error:", e); window.hideLoader(); }
+    };
+
+    window.refreshAdminData = function() { 
+        window.loadDashboardStats(); 
+        let dataViewPage = document.getElementById('page-data-view');
+        if(dataViewPage && dataViewPage.classList.contains('active-page')) { 
+            window.fetchAdminData(window.currentAdminCategory); 
+        }
+    };
+    // ==========================================
+    // 5. MASTER DATA ENGINE (Pagination, Modals, Full Fixes)
+    // ==========================================
+    window.globalDataCache = []; 
+    window.visibleCount = 4; // See More 4 items limit
+    window.currentAdminCategory = '';
+    window.activeUserId = ''; 
+
+    window.openAdminPage = function(category) {
+        window.currentAdminCategory = category; 
+        window.goToPage('page-data-view');
+        
+        const titles = { 
+            'users': '👥 यूज़र्स लिस्ट', 'choupal': '🗣️ ई-चौपाल', 'diary': '📖 डायरी', 
+            'complaints': '📝 शिकायतें', 'olx': '🛒 OLX मार्केट', 'notices': '📢 नोटिस', 
+            'blue_tick': '✅ KYC वेरिफिकेशन', 'spam': '🤖 AI स्पैम मॉडरेटर', 'leaderboard': '⭐ कर्मा लीडरबोर्ड'
+            // Locker completely removed
+        };
+        
+        document.getElementById('view-title').innerText = titles[category] || 'डेटा व्यू';
+        document.getElementById('search-box').value = '';
+        document.getElementById('data-list-container').innerHTML = "<p align='center' style='color:#888;'>डेटाबेस से जानकारी लायी जा रही है...</p>";
+        document.getElementById('btn-load-more').style.display = 'none';
+        
+        let headerTools = document.getElementById('dynamic-header-tools');
+        headerTools.style.display = 'none';
+        headerTools.innerHTML = '';
+        
+        if(category === 'leaderboard') {
+            headerTools.style.display = 'block';
+            headerTools.innerHTML = `
+                <h4 style="color:var(--admin-gold); margin-bottom:5px;">⭐ लीडरबोर्ड का नोटिस सेट करें</h4>
+                <textarea id="lb-notice" style="width:100%; padding:10px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,215,0,0.3); color:white; border-radius:8px; outline:none;" rows="2" placeholder="लीडरबोर्ड में आने के लिए ई-चौपाल में अच्छी जानकारी शेयर करें..."></textarea>
+                <button class="main-btn" style="background:linear-gradient(45deg, #ffd700, #ff9100); color:#000; margin-top:8px; width:100%; padding:10px; border-radius:8px;" onclick="showLoader(); saveLeaderboardNotice()">💾 नोटिस ऐप पर लाइव करें</button>
+            `;
+        } else if (category === 'choupal') {
+            headerTools.style.display = 'block';
+            headerTools.innerHTML = `
+                <h4 style="color:var(--admin-orange); margin-bottom:5px;">📌 ई-चौपाल में डेवलपर का मैसेज पिन करें</h4>
+                <input type="text" id="dev-pin-msg" style="width:100%; padding:10px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,145,0,0.3); color:white; border-radius:8px; outline:none;" placeholder="गाँव वालों के लिए ख़ास संदेश...">
+                <button class="main-btn" style="background:linear-gradient(45deg, #ff9100, #ff6d00); color:#000; margin-top:8px; width:100%; padding:10px; border-radius:8px;" onclick="showLoader(); pinDeveloperMessage()">📌 मैसेज सबसे ऊपर पिन करें</button>
+            `;
+        }
+        
+        window.fetchAdminData(category);
+    };
+
+    window.saveLeaderboardNotice = async function() {
+        const msg = document.getElementById('lb-notice').value;
+        if(!msg) { window.hideLoader(); return window.customAlert("कृपया नोटिस लिखें!"); }
+        await db.collection("settings").doc("leaderboard_notice").set({ message: msg });
+        window.hideLoader();
+        window.customAlert("✅ लीडरबोर्ड का नोटिस ऐप पर लाइव हो गया!");
+    };
+    
+    window.pinDeveloperMessage = async function() {
+        const msg = document.getElementById('dev-pin-msg').value;
+        if(!msg) { window.hideLoader(); return window.customAlert("कृपया मैसेज लिखें!"); }
+        await db.collection("choupal_posts").add({ authorName: "👨‍💻 मास्टर डेवलपर (Admin)", message: msg, isPinned: true, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
+        window.hideLoader();
+        window.customAlert("📌 डेवलपर मैसेज ई-चौपाल में पिन हो गया!");
+        window.fetchAdminData('choupal');
+    };
+
+    window.fetchAdminData = async function(category) {
+        window.showLoader();
+        try {
+            let colName = category;
+            if(category === 'olx') colName = 'olx_posts';
+            else if(category === 'choupal' || category === 'spam') colName = 'choupal_posts';
+            else if(category === 'diary') colName = 'digital_diary';
+            else if(category === 'blue_tick') colName = 'kyc_requests';
+            else if(category === 'leaderboard') colName = 'users';
+
+            const snap = await db.collection(colName).get();
+            window.globalDataCache = [];
+            
+            snap.forEach(doc => { 
+                let data = doc.data();
+                if(category === 'spam' && data.isSpam !== true) return; 
+                if(category === 'choupal' && data.isSpam === true) return;
+                window.globalDataCache.push({ id: doc.id, data: data }); 
+            });
+            
+            if(category === 'leaderboard') {
+                window.globalDataCache.sort((a,b) => (b.data.karmaPoints || 0) - (a.data.karmaPoints || 0));
+            } else {
+                window.globalDataCache.sort((a,b) => { 
+                    if(category === 'choupal') {
+                        if(a.data.isPinned && !b.data.isPinned) return -1;
+                        if(!a.data.isPinned && b.data.isPinned) return 1;
+                    }
+                    let tA = a.data.timestamp && typeof a.data.timestamp.toMillis === 'function' ? a.data.timestamp.toMillis() : 0; 
+                    let tB = b.data.timestamp && typeof b.data.timestamp.toMillis === 'function' ? b.data.timestamp.toMillis() : 0; 
+                    return tB - tA; 
+                });
+            }
+            
+            window.visibleCount = 4; 
+            window.renderAdminList();
+            window.hideLoader();
+        } catch(e) { console.error("Fetch Data Error:", e); window.hideLoader(); }
+    };
+
+    window.renderAdminList = function() {
+        const listDiv = document.getElementById('data-list-container'); 
+        if(!listDiv) return; listDiv.innerHTML = "";
+        
+        const query = document.getElementById('search-box').value.toLowerCase();
+        
+        let filteredData = window.globalDataCache.filter(item => {
+            const d = item.data; 
+            const str = String(d.name||'') + " " + String(d.title||'') + " " + String(d.mobile||'') + " " + String(d.description||'') + " " + String(d.message||'') + " " + String(d.userMobile||'');
+            return str.toLowerCase().includes(query);
+        });
+
+        let displayData = filteredData.slice(0, window.visibleCount);
+        if(displayData.length === 0) {
+            listDiv.innerHTML = "<p align='center' style='color:#ff3366;'>कोई डेटा नहीं मिला।</p>";
+            document.getElementById('btn-load-more').style.display = 'none';
+            return;
+        }
+        
+        // Optimize rendering using a single string append for high FPS
+        let htmlContent = '';
+        
+        displayData.forEach((item, index) => {
+            const d = item.data; const id = item.id; let html = '';
+            
+            let userSlideAction = '';
+            if(d.mobile) userSlideAction = `onclick="openUserSlide('${d.mobile}')"`;
+            else if(d.userMobile) userSlideAction = `onclick="openUserSlide('${d.userMobile}')"`;
+            
+            let authorNameHtml = `<span class="author-highlight" ${userSlideAction}>${d.userName || d.authorName || d.name || d.userMobile || 'अज्ञात'}</span>`;
+
+            if(window.currentAdminCategory === 'users') {
+                let isBanned = d.banUntil ? true : false;
+                let statusDot = isBanned ? '🔴' : '🟢';
+                html = `<div class="data-card" style="padding:15px; display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="openUserSlide('${d.mobile}')">
+                    <div style="font-weight:bold; font-size:16px; color:#fff;">👤 ${d.name||'अज्ञात'} <span style="font-size:12px;">${statusDot}</span></div>
+                    <div style="color:var(--admin-accent); font-size:12px; border:1px solid rgba(0,229,255,0.3); padding:5px 10px; border-radius:15px;">पूरी डिटेल्स ❯</div>
+                </div>`;
+            } 
+            else if (window.currentAdminCategory === 'blue_tick') {
+                let imgHtml = d.documentBase64 ? `<img src="${d.documentBase64}" loading="lazy" style="max-height:200px; border-radius:8px; margin-top:10px; border:1px solid var(--admin-accent);">` : '';
+                html = `<div class="data-card" style="border-left-color:var(--admin-blue);">
+                    <div class="title" style="color:var(--admin-accent);">✅ KYC रिक्वेस्ट</div>
+                    <div class="info">👤 मोबाइल नंबर: <span class="author-highlight" onclick="openUserSlide('${d.mobile}')">${d.mobile}</span></div>
+                    <div class="info" style="color:#aaa;">डॉक्यूमेंट:</div>
+                    ${imgHtml}
+                    <div class="action-btns" style="margin-top:15px;">
+                        <button class="small-btn ok-action-btn" onclick="showLoader(); approveKYC('${id}', '${d.mobile}')">✅ अप्रूव (ब्लू टिक दें)</button>
+                        <button class="small-btn del-btn" onclick="adminDeleteData('kyc_requests', '${id}')">❌ रिजेक्ट</button>
+                    </div>
+                </div>`;
+            }
+            else if (window.currentAdminCategory === 'complaints') {
+                let imgHtml = d.photoBase64 ? `<img src="${d.photoBase64}" loading="lazy">` : '';
+                let replyKey = d.reply || ''; 
+                html = `<div class="data-card"><div class="title">📝 ${d.title||'शिकायत'} <span style="font-size:11px; color:#888;">${new Date().toLocaleDateString()}</span></div>
+                <div class="info" style="color:var(--admin-accent); font-weight:bold; background:rgba(0,229,255,0.1); padding:8px; border-radius:8px;">👤 शिकायतकर्ता: ${authorNameHtml} <br>📱 नंबर: ${d.userMobile||'N/A'} <br>🏠 वार्ड/पता: ${d.userAddress||'N/A'}</div>
+                <div class="info" style="color:white; margin-top:10px; font-size:14px;">"${d.description||''}"</div>${imgHtml}
+                <textarea id="reply-${id}" style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); color:white; border-radius:10px; margin-bottom:10px; outline:none;" rows="2" placeholder="अपना जवाब यहाँ लिखें...">${replyKey}</textarea>
+                <div class="action-btns"><button class="small-btn ok-action-btn" onclick="showLoader(); submitAnyReply('complaints', '${id}', 'reply')">✅ रिप्लाई सेंड</button><button class="small-btn del-btn" onclick="adminDeleteData('complaints', '${id}')">🗑️ डिलीट</button></div></div>`;
+            } 
+            else if (window.currentAdminCategory === 'leaderboard') {
+                let pts = d.karmaPoints || 0; 
+                let stars = pts >= 100 ? '⭐⭐⭐⭐⭐' : pts >= 50 ? '⭐⭐⭐⭐' : pts >= 20 ? '⭐⭐⭐' : pts >= 10 ? '⭐⭐' : '⭐';
+                let medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '🎗️';
+                html = `<div class="data-card" style="display:flex; justify-content:space-between; align-items:center;">
+                    <div style="display:flex; align-items:center; gap:15px;"><div style="font-size:24px;">${medal}</div>
+                    <div><div class="title" style="margin:0; border:none; padding:0; cursor:pointer;" onclick="openUserSlide('${d.mobile}')">${d.name||'अज्ञात'}</div><div style="font-size:12px; color:var(--admin-accent);">${pts} कर्मा पॉइंट्स</div></div></div>
+                    <div style="text-align:right;"><div style="font-size:12px; letter-spacing:1px; margin-bottom:5px;">${stars}</div>
+                    <button class="small-btn" style="background:linear-gradient(45deg, #ffd700, #ff9100); color:#000; padding:5px 10px; border-radius:8px;" onclick="showLoader(); awardManualPoints('${id}')">➕ पॉइंट दें</button></div>
+                </div>`;
+            }
+            else if (window.currentAdminCategory === 'spam') {
+                html = `<div class="data-card" style="border-left-color:var(--admin-red);"><div class="title" style="color:#ff3366;">🚨 ऑटो-ब्लॉक की गई पोस्ट</div><div class="info" style="color:white; font-style:italic;">"${d.message||d.description||''}"</div><div class="info">👤 यूज़र: ${authorNameHtml}</div><div class="action-btns"><button class="small-btn ok-action-btn" onclick="approveSpamPost('${id}')">✅ सेफ मार्क करें (पब्लिश)</button><button class="small-btn del-btn" onclick="adminDeleteData('choupal_posts', '${id}')">🗑️ डिलीट करें</button></div></div>`;
+            }
+            else {
+                // E-Choupal, OLX, Gallery, Notices, Diary
+                let dbCol = window.currentAdminCategory === 'olx' ? 'olx_posts' : window.currentAdminCategory === 'choupal' ? 'choupal_posts' : window.currentAdminCategory === 'gallery' ? 'gallery' : window.currentAdminCategory === 'notices' ? 'notices' : 'digital_diary';
+                let imgHtml = (d.photoBase64 || d.image) ? `<img src="${d.photoBase64 || d.image}" loading="lazy">` : '';
+                let pinBadge = d.isPinned ? `<span style="background:linear-gradient(45deg,#ff9100,#ff6d00); color:#000; padding:2px 6px; border-radius:4px; font-size:10px; margin-left:5px;">📌 Pinned</span>` : '';
+                
+                let titleHtml = (window.currentAdminCategory === 'choupal' || window.currentAdminCategory === 'olx') ? authorNameHtml : (d.title||d.name||'डेटा');
+                
+                html = `<div class="data-card"><div class="title">${titleHtml} ${pinBadge}</div><div class="info" style="color:white; font-size:14px;">${d.description||d.message||''}</div>${window.currentAdminCategory === 'diary' ? `<div class="info">📞 ${d.contact||''}</div>` : ''}${imgHtml}<div class="action-btns"><button class="small-btn del-btn" style="width:100%; padding:12px;" onclick="adminDeleteData('${dbCol}', '${id}')">🗑️ इसे डिलीट करें</button></div></div>`;
+            }
+            htmlContent += html;
+        });
+        
+        listDiv.innerHTML = htmlContent;
+        
+        let loadMoreBtn = document.getElementById('btn-load-more');
+        if(loadMoreBtn) { loadMoreBtn.style.display = (filteredData.length > window.visibleCount) ? 'block' : 'none'; }
+    };
+
+    window.handleSearch = function() { window.visibleCount = 4; window.renderAdminList(); };
+    window.loadMoreData = function() { window.visibleCount += 4; window.renderAdminList(); };
+
+    // ==========================================
+    // 6. SPECIFIC FEATURE ACTIONS & BAN LOGIC
+    // ==========================================
+    window.adminDeleteData = async function(col, id) { 
+        window.customConfirm("⚠️ क्या आप इसे हमेशा के लिए डिलीट करना चाहते हैं?", async function() { 
+            window.showLoader();
+            try { await db.collection(col).doc(id).delete(); window.fetchAdminData(window.currentAdminCategory); } catch(e) { window.hideLoader(); }
+        }); 
+    };
+    
+    window.submitAnyReply = async function(colName, docId, fieldName) { 
+        const replyText = document.getElementById(`reply-${docId}`).value; 
+        if(!replyText) { window.hideLoader(); return window.customAlert("⚠️ कृपया रिप्लाई लिखें!"); }
+        try { let obj = { status: "Resolved" }; obj[fieldName] = replyText; await db.collection(colName).doc(docId).update(obj); window.hideLoader(); window.customAlert("✅ रिप्लाई सेंड कर दिया गया!"); window.fetchAdminData(window.currentAdminCategory); } catch(e) { window.hideLoader(); }
+    };
+
+    window.openUserSlide = async function(mobileNum) {
+        if(!mobileNum) return window.customAlert("इस यूज़र का नंबर उपलब्ध नहीं है!");
+        window.showLoader();
+        
+        try {
+            const docSnap = await db.collection("users").doc(String(mobileNum)).get();
+            if(!docSnap.exists) { window.hideLoader(); return window.customAlert("डेटाबेस में यह यूज़र नहीं मिला!"); }
+            
+            let uData = docSnap.data();
+            window.activeUserId = mobileNum; 
+            
+            let statusHTML = uData.banUntil ? `<span style="color:#ff3366; font-weight:bold;">🔴 Banned</span>` : `<span style="color:#00e676; font-weight:bold;">🟢 Active</span>`;
+            let tickHtml = uData.isVerified ? '<span style="color:#00e5ff;">✅ Blue Tick</span>' : '<span style="color:#aaa;">❌ Not Verified</span>';
+            
+            let content = `
+                <div style="text-align:center; margin-bottom:20px;">
+                    <div style="font-size:50px; margin-bottom:5px;">👤</div>
+                    <h2 style="color:#fff; margin:0;">${uData.name || 'अज्ञात'}</h2>
+                    <p style="color:var(--admin-accent); font-weight:bold; font-size:16px;">${mobileNum}</p>
+                </div>
+                <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:12px; margin-bottom:15px; border:1px solid rgba(255,255,255,0.1);">
+                    <div style="margin-bottom:8px;"><b>केटेगरी:</b> <span style="color:#aaa;">${uData.category || 'N/A'}</span></div>
+                    <div style="margin-bottom:8px;"><b>वार्ड/पता:</b> <span style="color:#aaa;">${uData.ward || 'N/A'}</span></div>
+                    <div style="margin-bottom:8px;"><b>पासवर्ड:</b> <span style="color:var(--admin-gold);">${uData.password || 'N/A'}</span></div>
+                    <div style="margin-bottom:8px;"><b>कर्मा पॉइंट्स:</b> 🏆 <span style="color:#ff9100;">${uData.karmaPoints || 0}</span></div>
+                    <div style="margin-bottom:8px;"><b>वेरिफिकेशन:</b> ${tickHtml}</div>
+                    <div style="margin-top:10px; padding-top:10px; border-top:1px dashed rgba(255,255,255,0.1);"><b>अकाउंट स्थिति:</b> ${statusHTML}</div>
+                </div>
+                
+                <h4 style="color:#ff9100; font-size:13px; margin-bottom:10px;">⚠️ यूज़र पर एक्शन लें (Block/Ban)</h4>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
+                    <button class="small-btn ban-btn" onclick="applyUserBan(1)">1 घंटे बैन</button>
+                    <button class="small-btn ban-btn" onclick="applyUserBan(3)">3 घंटे बैन</button>
+                    <button class="small-btn ban-btn" onclick="applyUserBan(6)">6 घंटे बैन</button>
+                    <button class="small-btn del-btn" onclick="applyUserBan('perm')">हमेशा के लिए बैन</button>
+                </div>
+                <button class="small-btn ok-action-btn" style="width:100%; padding:12px; margin-bottom:15px;" onclick="applyUserBan('unban')">✅ अनबैन करें (Unblock)</button>
+                <button class="small-btn" style="background:linear-gradient(45deg, #d500f9, #aa00ff); color:white; width:100%; padding:12px;" onclick="directPasswordReset('${mobileNum}')">🔑 नया पासवर्ड सेट करें</button>
+            `;
+            document.getElementById('slide-user-content').innerHTML = content;
+            document.getElementById('side-slide').classList.add('open');
+            window.hideLoader();
+        } catch(e) { window.hideLoader(); window.customAlert("एरर: " + e.message); }
+    };
+
+    window.closeUserSlide = function() { document.getElementById('side-slide').classList.remove('open'); };
+
+    window.applyUserBan = async function(duration) {
+        if(!window.activeUserId) return;
+        window.showLoader();
+        let banTimeVal = null; const now = new Date().getTime(); 
+        
+        if(duration === 1) banTimeVal = now + (1*3600*1000); 
+        else if(duration === 3) banTimeVal = now + (3*3600*1000); 
+        else if(duration === 6) banTimeVal = now + (6*3600*1000); 
+        else if(duration === 'perm') banTimeVal = 'perm'; 
+        
+        try {
+            await db.collection("users").doc(window.activeUserId).update({ banUntil: banTimeVal });
+            window.customAlert(duration === 'unban' ? "✅ यूज़र को अनबैन कर दिया गया है!" : `⏳ यूज़र को बैन कर दिया गया है!`);
+            window.closeUserSlide();
+            if(window.currentAdminCategory === 'users') window.fetchAdminData('users');
+        } catch(e) { window.hideLoader(); window.customAlert("एरर: " + e.message); }
+    };
+    // ==========================================
+    // 7. KYC APPROVAL (Feature 3 Fix)
+    // ==========================================
+    window.approveKYC = async function(docId, mobileNum) {
+        if(!mobileNum) { window.hideLoader(); return window.customAlert("यूज़र का नंबर नहीं मिला!"); }
+        try {
+            await db.collection("users").doc(String(mobileNum)).update({ isVerified: true });
+            await db.collection("kyc_requests").doc(docId).delete();
+            
+            window.customAlert("✅ यूज़र को सफलतापूर्वक ब्लू टिक दे दिया गया है!");
+            window.fetchAdminData('blue_tick'); 
+        } catch(e) { window.hideLoader(); window.customAlert("एरर: " + e.message); }
+    };
+
+    // ==========================================
+    // 8. LIVE POLLING DETAILS & PERCENTAGE (Feature 2 Fix)
+    // ==========================================
+    window.addPollOption = function() {
+        const cont = document.getElementById('poll-options-container');
+        const div = document.createElement('div'); 
+        div.className = 'input-group'; div.style.marginBottom = '12px';
+        div.innerHTML = `<input type="text" class="poll-option-input" placeholder="नया विकल्प">`;
+        cont.appendChild(div);
+    };
+
+    window.publishPoll = async function() {
+        const q = document.getElementById('poll-question').value; 
+        if(!q) { window.hideLoader(); return window.customAlert("⚠️ सवाल लिखें!"); }
+        
+        let opts = []; let inputs = document.querySelectorAll('.poll-option-input');
+        for(let i=0; i<inputs.length; i++) { 
+            if(inputs[i].value.trim() !== '') { 
+                opts.push({ text: inputs[i].value.trim(), votes: 0, voters: [] }); 
+            } 
+        }
+        
+        if(opts.length < 2) { window.hideLoader(); return window.customAlert("⚠️ कम से कम 2 विकल्प ज़रूरी हैं!"); }
+        
+        try { 
+            await db.collection("polls").add({ question: q, options: opts, totalVotes: 0, active: true, timestamp: firebase.firestore.FieldValue.serverTimestamp() }); 
+            window.customAlert("📊 पोल लाइव हो गया!"); 
+            document.getElementById('poll-question').value = ''; 
+            window.loadActivePolls(); 
+        } catch(e) { window.hideLoader(); window.customAlert(e.message); }
+    };
+
+    window.loadActivePolls = async function() {
+        let cont = document.getElementById('active-polls-container');
+        if(!cont) return;
+        try {
+            const snap = await db.collection("polls").where("active", "==", true).get();
+            cont.innerHTML = "";
+            if(snap.empty) { cont.innerHTML = "<p align='center' style='color:#888;'>कोई एक्टिव पोल नहीं है।</p>"; window.hideLoader(); return; }
+            
+            let pollsHtml = '';
+            snap.forEach(doc => {
+                let d = doc.data();
+                let optionsHtml = '';
+
+                d.options.forEach((opt) => {
+                    let percent = d.totalVotes > 0 ? Math.round((opt.votes / d.totalVotes) * 100) : 0;
+                    let votersStr = (opt.voters && opt.voters.length > 0) ? opt.voters.join(', ') : 'अभी किसी ने नहीं';
+
+                    optionsHtml += `
+                        <div style="margin-top:15px;">
+                            <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:5px;">
+                                <span style="color:#ddd; font-weight:bold;">${opt.text} (${opt.votes} वोट)</span>
+                                <span style="color:var(--admin-accent); font-weight:bold;">${percent}%</span>
+                            </div>
+                            <div class="progress-bar-bg" style="height:8px; background:rgba(255,255,255,0.05); border-radius:10px;">
+                                <div class="progress-bar-fill" style="width:${percent}%; background:linear-gradient(45deg,#00e5ff,#007bff); border-radius:10px;"></div>
+                            </div>
+                            <div style="font-size:11px; color:#888; margin-top:6px; background:rgba(0,0,0,0.3); padding:5px; border-radius:5px;">
+                                👥 <b>वोटर्स:</b> ${votersStr}
+                            </div>
+                        </div>
+                    `;
+                });
+
+                pollsHtml += `
+                <div class="data-card" style="border-left-color:var(--admin-purple);">
+                    <div class="title" style="color:var(--admin-purple); font-size:18px; margin-bottom:5px;">📊 ${d.question}</div>
+                    <div style="font-size:12px; color:#aaa; margin-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:5px;">कुल वोट: ${d.totalVotes}</div>
+                    ${optionsHtml}
+                    <button class="small-btn del-btn" style="width:100%; margin-top:20px; padding:12px;" onclick="showLoader(); adminDeleteData('polls', '${doc.id}'); setTimeout(loadActivePolls, 1000);">🗑️ यह पोल डिलीट करें</button>
+                </div>`;
+            });
+            cont.innerHTML = pollsHtml;
+            window.hideLoader();
+        } catch(e) { window.hideLoader(); window.customAlert("एरर: " + e.message); }
+    };
+
+    // ==========================================
+    // 9. BANNERS, SCHEDULE & SETTINGS
+    // ==========================================
+    window.uploadBanner = function() {
+        const title = document.getElementById('banner-title').value; 
+        const link = document.getElementById('banner-link').value; 
+        const photo = document.getElementById('banner-photo');
+        
+        if(!title || photo.files.length === 0) { window.hideLoader(); return window.customAlert("⚠️ टाइटल और फोटो ज़रूरी है!"); }
+        
+        window.compressImage(photo.files[0], 200, async function(imgBase64) {
+            try { 
+                await db.collection("home_banners").add({ title: title, link: link, image: imgBase64, active: true, timestamp: firebase.firestore.FieldValue.serverTimestamp() }); 
+                window.customAlert("🖼️ बैनर अपलोड हो गया!"); 
+                document.getElementById('banner-title').value=''; 
+                window.goToPage('page-dashboard'); 
+            } catch(e) { window.hideLoader(); window.customAlert(e.message); }
+        });
+    };
+
+    window.scheduleNotification = async function() {
+        const target = document.getElementById('schedule-target').value; 
+        const timeVal = document.getElementById('schedule-time').value; 
+        const title = document.getElementById('schedule-title').value; 
+        const msg = document.getElementById('schedule-msg').value;
+        
+        if(!timeVal || !title || !msg) { window.hideLoader(); return window.customAlert("⚠️ सारी जानकारी भरें!"); }
+        
+        try { 
+            await db.collection("scheduled_push").add({ target: target, sendAt: new Date(timeVal), title: title, message: msg, status: "pending", timestamp: firebase.firestore.FieldValue.serverTimestamp() }); 
+            window.customAlert("⏰ मैसेज शेड्यूल हो गया है!"); 
+            window.goToPage('page-dashboard'); 
+        } catch(e) { window.hideLoader(); }
+    };
+
+    window.saveAllSettings = async function() {
+        const maint = document.getElementById('maintToggle').checked; 
+        const forceUp = document.getElementById('updateToggle').checked;
+        const appLink = document.getElementById('app-update-link').value; 
+        const tempoLink = document.getElementById('tempo-link').value;
+        
+        let dataObj = { maintenance: maint, forceUpdate: forceUp, updateLink: appLink, tempoLink: tempoLink };
+        if(maint) { 
+            await db.collection("settings").doc("global_alert").set({ message: "ऐप में अभी मेंटेनेंस का काम चल रहा है। कृपया कुछ देर बाद आएं।", timestamp: firebase.firestore.FieldValue.serverTimestamp() }); 
+        }
+        
+        await db.collection("settings").doc("app_config").set(dataObj, { merge: true });
+        window.customAlert("✅ सभी सिस्टम सेटिंग्स सफलतापूर्वक अपडेट हो गईं!");
+        window.hideLoader();
+    };
+
+    // ==========================================
+    // 10. BACKUP, RESTORE & PDF (Feature 6 Fix for Kodular)
+    // ==========================================
+    window.downloadFullBackup = async function() {
+        try {
+            let backupData = {}; 
+            const collections = ['users', 'notices', 'choupal_posts', 'olx_posts', 'polls', 'digital_diary', 'gallery'];
+            
+            for(let i=0; i<collections.length; i++) {
+                let col = collections[i]; 
+                const snap = await db.collection(col).get(); 
+                backupData[col] = [];
+                snap.forEach(doc => { 
+                    let d = doc.data(); 
+                    if(d.timestamp && d.timestamp.toDate) { d.timestamp = d.timestamp.toDate().toISOString(); } 
+                    backupData[col].push({ id: doc.id, ...d }); 
+                });
+            }
+            
+            // Base64 URI (Kodular Supported)
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
+            const a = document.createElement('a'); 
+            a.href = dataStr; 
+            a.download = `Jaleu_Full_Backup_${new Date().toLocaleDateString().replace(/\//g,'-')}.json`; 
+            document.body.appendChild(a); 
+            a.click(); 
+            a.remove(); 
+            
+            window.customAlert("✅ पूरा डेटाबेस JSON में डाउनलोड हो गया!");
+        } catch(e) { window.hideLoader(); window.customAlert("एरर: " + e.message); }
+    };
+
+    window.downloadUsersPDF = async function() {
+        if(!window.jspdf) { window.hideLoader(); return window.customAlert("PDF लाइब्रेरी लोड हो रही है, कृपया दोबारा प्रयास करें।"); }
+        try {
+            const { jsPDF } = window.jspdf; const doc = new jsPDF();
+            doc.setFontSize(18); doc.text("Jaleu App - Users Directory", 14, 22);
+            
+            const snap = await db.collection("users").get(); let tableData = [];
+            snap.forEach(d => { 
+                let u = d.data(); 
+                tableData.push([u.name || 'N/A', u.mobile || 'N/A', u.password || 'N/A', u.ward || 'N/A', u.karmaPoints || '0']); 
+            });
+            
+            doc.autoTable({ startY: 30, head: [['Name', 'Mobile', 'Password', 'Address', 'Karma']], body: tableData, theme: 'grid', styles: { fontSize: 10 } });
+            
+            // Base64 URI (Kodular Supported)
+            const pdfDataUri = doc.output('datauristring');
+            const a = document.createElement('a');
+            a.href = pdfDataUri;
+            a.download = `Jaleu_Users_${new Date().toLocaleDateString().replace(/\//g,'-')}.pdf`;
+            document.body.appendChild(a); a.click(); a.remove();
+
+            window.customAlert("✅ यूज़र्स की PDF सफलतापूर्वक डाउनलोड हो गई!");
+        } catch(e) { window.hideLoader(); window.customAlert("PDF एरर: " + e.message); }
+    };
+
+    window.uploadOldDataRestore = function() {
+        const fileInput = document.getElementById('restore-file');
+        if(fileInput.files.length === 0) { window.hideLoader(); return window.customAlert("⚠️ कृपया पहले JSON फाइल चुनें!"); }
+        
+        window.customConfirm("⚠️ डेटा रिस्टोर करने से ऐप में पुराना डेटा आ जाएगा। क्या आप पक्का ऐसा करना चाहते हैं?", function() {
+            window.showLoader();
+            const file = fileInput.files[0]; const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    const data = JSON.parse(e.target.result); 
+                    for (const collection in data) {
+                        for (const item of data[collection]) {
+                            let docId = item.id; delete item.id; 
+                            if(item.timestamp) item.timestamp = firebase.firestore.Timestamp.fromDate(new Date(item.timestamp));
+                            await db.collection(collection).doc(docId).set(item);
+                        }
+                    }
+                    window.customAlert("✅ आपका सारा पुराना डेटा सफलतापूर्वक रिस्टोर हो गया है!"); 
+                    fileInput.value = '';
+                    window.hideLoader();
+                } catch(error) { window.hideLoader(); window.customAlert("❌ एरर: आपकी JSON फाइल का फॉर्मेट सही नहीं है।"); }
+            };
+            reader.readAsText(file);
+        });
+    };
+
+    // ==========================================
+    // 11. SMART UPLOAD & IMAGE COMPRESSOR (Locker Removed)
+    // ==========================================
+    window.compressImage = function(file, targetKB, callback) {
+        const reader = new FileReader(); reader.readAsDataURL(file);
+        reader.onload = function(e) {
+            const img = new Image(); img.src = e.target.result;
+            img.onload = function() {
+                const canvas = document.createElement('canvas'); let width = img.width, height = img.height;
+                if(width > 1000) { height *= 1000/width; width = 1000; }
+                canvas.width = width; canvas.height = height; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height);
+                let quality = 0.9; let dataUrl = canvas.toDataURL('image/jpeg', quality);
+                while(Math.round((dataUrl.length * 0.75) / 1024) > targetKB && quality > 0.1) { 
+                    quality -= 0.1; dataUrl = canvas.toDataURL('image/jpeg', quality); 
+                }
+                callback(dataUrl);
+            }
+        }
+    };
+    
+    window.toggleUploadFields = function() {
+        const cat = document.getElementById('upload-category').value;
+        let f2Box = document.getElementById('up-f2-box'); 
+        let photoBox = document.getElementById('up-photo-box');
+        
+        if(f2Box) f2Box.style.display = (cat==='gallery') ? 'none' : 'block';
+        if(photoBox) photoBox.style.display = (cat==='gallery') ? 'block' : 'none';
+        
+        let f1Lbl = document.getElementById('up-f1-lbl'); let f2Lbl = document.getElementById('up-f2-lbl');
+        if(f1Lbl && f2Lbl) {
+            if(cat==='notice') { f1Lbl.innerText = "नोटिस विषय"; f2Lbl.innerText = "पूरी जानकारी"; }
+            else if(cat==='diary') { f1Lbl.innerText = "नाम"; f2Lbl.innerText = "नंबर"; }
+            else if(cat==='emergency') { f1Lbl.innerText = "सेवा का नाम"; f2Lbl.innerText = "नंबर"; }
+            else { f1Lbl.innerText = "फोटो का कैप्शन"; }
+        }
+    };
+
+    let btnSubmitUpload = document.getElementById('btn-submit-upload');
+    if(btnSubmitUpload) {
+        btnSubmitUpload.addEventListener('click', async function() {
+            window.showLoader();
+            const cat = document.getElementById('upload-category').value; 
+            const f1 = document.getElementById('up-f1').value; 
+            const f2 = document.getElementById('up-f2').value; 
+            const photo = document.getElementById('up-photo'); 
+            const targetKB = parseInt(document.getElementById('up-compress-size').value);
+            
+            if(!f1) { window.hideLoader(); return window.customAlert("⚠️ पहली फील्ड ज़रूर भरें!"); }
+            
+            try {
+                if(cat==='notice') { 
+                    if(!f2) { window.hideLoader(); return window.customAlert("विवरण भरें!"); } 
+                    await db.collection("notices").add({ title:f1, description:f2, timestamp:firebase.firestore.FieldValue.serverTimestamp() }); 
+                    window.finishUpload(); 
+                }
+                else if(cat==='diary') { 
+                    await db.collection("digital_diary").add({ name:f1, contact:f2, timestamp:firebase.firestore.FieldValue.serverTimestamp() }); 
+                    window.finishUpload(); 
+                }
+                else if(cat==='emergency') { 
+                    await db.collection("emergency_contacts").add({ title:f1, name:f2, mobile:f2 }); 
+                    window.finishUpload(); 
+                }
+                else if(cat==='gallery') { 
+                    if(photo.files.length === 0) { window.hideLoader(); return window.customAlert("फोटो चुनें!"); } 
+                    window.compressImage(photo.files[0], targetKB, async function(img) { 
+                        await db.collection("gallery").add({ title:f1, photoBase64:img, timestamp:firebase.firestore.FieldValue.serverTimestamp() }); 
+                        window.finishUpload(); 
+                    }); 
+                }
+            } catch(e) { window.hideLoader(); window.customAlert("एरर: " + e.message); }
+        });
+    }
+
+    window.finishUpload = function() { 
+        window.customAlert("✅ डेटा सफलतापूर्वक अपलोड हो गया!"); 
+        window.goToPage('page-dashboard'); 
+        document.getElementById('up-f1').value=''; 
+        document.getElementById('up-f2').value=''; 
+        let upPhoto = document.getElementById('up-photo'); 
+        if(upPhoto) upPhoto.value=''; 
+        window.loadDashboardStats(); 
+    };
+
+</script>
+</body>
+</html>
